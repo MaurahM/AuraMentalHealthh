@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sign Up</title>
+  <style>
+    :root{
+      --bg:#3b1534; /* page background */
+      --accent:#ff2fa6; /* pink button */
+      --muted:#d9c9dc;
+      --white: #ffffff;
+      --dark-input: rgba(0, 0, 0, 0.2);
+    }
+    /* ---------------------- GLOBAL & LAYOUT ---------------------- */
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:var(--white);background:var(--bg)}
+    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:48px}
+    .card{
+      width:100%;max-width:1100px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.03));
+      border-radius:12px; /* Slightly larger border radius */
+      padding:36px 28px;
+      /* ENHANCED SHADOW FOR DEPTH */
+      box-shadow:
+        0 40px 80px rgba(0, 0, 0, 0.7), 
+        0 0 100px rgba(255, 47, 166, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.05); /* Subtle border for definition */
+      backdrop-filter: blur(8px); /* Frosted glass effect */
+      display:flex;gap:28px;align-items:stretch;box-sizing:border-box
+    }
+    .left,.right{flex:1;min-width:0}
+
+    /* ---------------------- LEFT PANEL (INFO) ---------------------- */
+    .left{padding:18px 28px;border-right:2px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;align-items:flex-start;gap:18px}
+    .illustration{
+      width:160px;height:160px;border-radius:999px;display:flex;align-items:center;justify-content:center;
+      /* GIVING THE ILLUSTRATION A GLOW */
+      border:3px solid rgba(255,255,255,0.12);
+      box-shadow: 0 0 40px rgba(255, 47, 166, 0.15); 
+    }
+    /* SVG ICON COLOR UPDATE */
+    .illustration svg path:first-child { 
+      fill: var(--accent); 
+      opacity: 0.6;
+    }
+    .headline{font-weight:700;font-size:24px;letter-spacing:1px;line-height:1.2} /* Larger headline */
+    .lead{color:var(--muted);max-width:320px;line-height:1.6;font-size:15px} /* Slightly larger lead text */
+    
+    /* ---------------------- RIGHT FORM ---------------------- */
+    .form-wrap{display:flex;flex-direction:column;align-items:center;padding:8px 24px}
+    .form-card{width:100%;max-width:420px}
+    h1{margin:6px 0 24px;font-size:30px;text-align:center;font-weight:800;} /* Larger and bolder title */
+    form{display:flex;flex-direction:column;gap:16px} /* Increased form gap */
+    label{display:block;font-size:14px;margin-bottom:6px;color:rgba(255,255,255,0.9);font-weight:600;} /* Bolder label */
+    
+    /* INPUT FIELD STYLES */
+    .pill{
+      display:block;width:100%;padding:14px 20px; /* Increased padding */
+      border-radius:999px;border:1px solid rgba(255, 255, 255, 0.1);
+      background:var(--dark-input); /* Dark input background */
+      box-sizing:border-box;font-size:15px;color:var(--white); /* White text */
+      outline:none;
+      box-shadow:inset 0 1px 3px rgba(0,0,0,0.4);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .pill::placeholder{color:rgba(255, 255, 255, 0.45)} /* Lighter placeholder */
+    .pill:focus {
+      border-color: var(--accent); /* Accent color on focus */
+      box-shadow: 0 0 0 3px rgba(255, 47, 166, 0.3), inset 0 1px 3px rgba(0,0,0,0.4);
+    }
+    
+    .small{font-size:14px;color:var(--muted);text-align:center;margin-top:12px}
+    
+    /* BUTTON STYLES */
+    .btn{
+      display:inline-block;margin-top:8px;width:240px; /* Slightly wider button */
+      background:linear-gradient(90deg,#ff2fa6,#ff5aa8);color:#fff;border:0;
+      padding:12px 24px;border-radius:999px;font-weight:700;cursor:pointer;
+      box-shadow:0 10px 30px rgba(255,47,166,0.3); /* Deeper button shadow */
+      transition: all 0.2s ease;
+    }
+    .btn:hover{
+      background:linear-gradient(90deg,#ff40b3,#ff71b5); /* Brighter hover gradient */
+      box-shadow:0 12px 35px rgba(255,47,166,0.5); /* Glowing hover shadow */
+    }
+    .btn:active{transform:translateY(1px);box-shadow:0 8px 25px rgba(255,47,166,0.3)}
+    
+    .muted{color:var(--muted);font-size:13px}
+    .error{color:#ffb3c6;font-size:13px;min-height:18px}
+    .terms{display:flex;gap:8px;align-items:center}
+
+    /* layout tweaks */
+    @media (max-width:880px){
+      .card{flex-direction:column;padding:20px}
+      .left{order:2;border-right:0;border-top:1px solid rgba(255,255,255,0.04);padding-top:18px}
+      .right{order:1}
+      .illustration{margin:0 auto}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card" role="main" aria-labelledby="signupTitle">
+      <div class="left" aria-hidden="false">
+        <div class="illustration" aria-hidden="true">
+          <svg width="96" height="96" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M16 34c-2-4 0-8 4-10 2-1 5-2 8-2s7 1 9 3c2 2 4 5 4 8s-1 6-4 8-6 3-9 3-7-1-9-3c-3-2-5-5-3-7z" fill="var(--accent)" opacity="0.6"/>
+            <path d="M38 22c0-3 3-6 6-6s6 3 6 6" stroke="white" stroke-opacity="0.9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="headline">MENTAL HEALTH SUPPORT CONVERSATIONAL AI</div>
+          <p class="lead">Connect with an empathetic AI assistant designed to support mental well‑being. Private, easy to use, and available whenever you need.</p>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="form-wrap">
+          <div class="form-card">
+            <h1 id="signupTitle">Sign Up</h1>
+
+            <form id="signupForm" novalidate>
+              <div>
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" class="pill" placeholder="example@gmail.com" autocomplete="email" required />
+              </div>
+
+              <div>
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" class="pill" placeholder="Choose a Username" required />
+              </div>
+
+              <div>
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" class="pill" placeholder="Minimum 8 characters" minlength="8" autocomplete="new-password" required />
+              </div>
+
+              <div>
+                <label for="confirm">Repeat Password</label>
+                <input id="confirm" name="confirm" type="password" class="pill" placeholder="Repeat Password" minlength="8" autocomplete="new-password" required />
+              </div>
+
+              <div class="terms">
+                <input id="terms" name="terms" type="checkbox" required />
+                <label for="terms" class="muted">I agree to the terms and privacy policy</label>
+              </div>
+
+              <div style="display:flex;align-items:center;justify-content:center;margin-top:6px;gap:12px; flex-direction: column;">
+                <span id="error" class="error" aria-live="polite"></span>
+                <button id="submitBtn" class="btn" type="submit">Sign Up</button>
+              </div>
+
+              <div class="small">Already Have an Account? <a href="login.html" style="color:var(--accent);text-decoration:none;font-weight:600">Log in</a></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+<script>
+const form = document.getElementById('signupForm');
+const pw = document.getElementById('password');
+const confirmPw = document.getElementById('confirm');
+const error = document.getElementById('error');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  error.textContent = '';
+  
+  // 1. Basic HTML and Terms Check
+  if (!form.checkValidity()) {
+    error.textContent = 'Please complete all required fields and agree to the terms.';
+    return;
+  }
+  
+  const emailValue = form.email.value.trim();
+  const usernameValue = form.username.value.trim();
+  const passwordValue = pw.value;
+
+  // 2. Password Length Check
+  if (passwordValue.length < 8) {
+    error.textContent = 'Password must be at least 8 characters.';
+    pw.focus();
+    return;
+  }
+  
+  // 3. Password Match Check
+  if (passwordValue !== confirmPw.value) {
+    error.textContent = 'Passwords do not match.';
+    confirmPw.focus();
+    return;
+  }
+
+  const payload = {
+    username: usernameValue, 
+    email: emailValue,
+    password: passwordValue
+  };
+  
+  // Optional: Disable button during submission
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Processing...';
+
+  try {
+    const res = await fetch('http://localhost:5000/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      error.textContent = data.message || 'Server error during sign up.';
+      return;
+    }
+
+    // Success
+    alert('Sign-up successful! You can now log in.');
+    // Optionally redirect to login page
+    window.location.href = 'login.html';
+
+  } catch (err) {
+    error.textContent = 'Network error. Could not connect to the server.';
+    console.error('Fetch Error:', err);
+  } finally {
+    // Re-enable button
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Sign Up';
+  }
+});
+</script>
+</body>
+</html>

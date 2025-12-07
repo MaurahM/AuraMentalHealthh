@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ 
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Profile Settings — Conversational AI</title>
+<style>
+/* --- BASE STYLES --- */
+:root{
+  --bg:#3b1534;
+  --panel:#5a2450;
+  --muted:#d9c9dc;
+  --accent:#ff2fa6;
+  --white:#ffffff;
+  --card:#6f3b64;
+}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;background:var(--bg);color:var(--white)}
+.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:28px;box-sizing:border-box}
+.panel{width:100%;max-width:820px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));border-radius:10px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,0.45)}
+h1{margin:0 0 12px;font-size:24px}
+h2{font-size:16px;margin:0;font-weight:700}
+fieldset{border:0;padding:0;margin:0}
+.section{background:rgba(255,255,255,0.02);padding:14px;border-radius:8px;margin-bottom:12px}
+label{display:block;font-size:13px;margin-bottom:6px;color:rgba(255,255,255,0.95)}
+input[type="text"],input[type="email"],input[type="number"],select,textarea,input[type="time"]{
+  width:100%;padding:10px 12px;border-radius:8px;border:0;background:rgba(255,255,255,0.95);color:#111;box-sizing:border-box;font-size:14px;outline:none
+}
+.row{display:flex;gap:8px}
+.col{display:flex;flex-direction:column;gap:8px}
+.small{font-size:13px;color:var(--muted)}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
+.btn{background:linear-gradient(90deg,var(--accent),#ff5aa8);color:#fff;border:0;padding:10px 14px;border-radius:999px;cursor:pointer}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer}
+.avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px}
+.avatar{width:96px;height:96px;border-radius:999px;border:3px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.trusted-list{margin-top:8px;display:flex;flex-direction:column;gap:8px}
+.trusted-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:rgba(255,255,255,0.03)}
+.chip{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,0.15);font-size:13px;color:var(--muted)}
+.chip input[type="checkbox"], .chip input[type="radio"] { margin-right: 4px; }
+.range{width:100%}
+
+
+/* --- ACCORDION STYLES (NEW) --- */
+.settings-group {
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.03));
+    margin-bottom: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 0;
+}
+.settings-group summary {
+    display: block;
+    padding: 16px;
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+    border-bottom: 1px solid transparent;
+    user-select: none;
+}
+.settings-group[open] summary {
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.settings-group summary::after {
+    content: '→';
+    font-size: 18px;
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%) rotate(0deg);
+    transition: transform 0.2s ease;
+    color: var(--accent);
+}
+.settings-group[open] summary::after {
+    transform: translateY(-50%) rotate(90deg);
+}
+.settings-group .summary-text {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--muted);
+    margin: 4px 0 0 0;
+}
+.settings-group .section {
+    background: transparent;
+    border-radius: 0;
+    padding: 16px;
+    margin-bottom: 0;
+    border-top: 1px solid rgba(255,255,255,0.02);
+}
+
+@media (max-width: 880px) { 
+    .row.split { display: block; }
+    .row.split > * { margin-bottom: 12px; }
+}
+</style>
+ <script src="theme-manager.js"></script>
+</head>
+<body>
+    <script>
+    // --- 🔑 AUTHENTICATION GUARD SCRIPT (MUST RUN FIRST) ---
+    const TOKEN_KEY = 'convai_user_token';
+    const token = localStorage.getItem(TOKEN_KEY);
+
+    // If the token is missing (meaning the user logged out), redirect immediately.
+    if (!token) {
+        window.location.href = 'index.html';
+    }
+    // --- END GUARD SCRIPT ---
+</script>
+  <main class="wrap" role="main" aria-labelledby="settingsTitle">
+    <section class="panel" aria-labelledby="settingsTitle">
+      <h1 id="settingsTitle">Profile Settings</h1>
+      <p class="small">Update basic info, preferences, privacy, and emergency contacts.</p>
+
+      <form id="settingsForm" novalidate>
+        
+        <details open class="settings-group">
+          <summary>
+            <h2>Personal Info & Preferences</h2>
+            <p class="summary-text">Name, Age, Language, and Daily Affirmation Time.</p>
+          </summary>
+          
+          <fieldset class="section" aria-labelledby="basicInfoLegend">
+            <legend id="basicInfoLegend" class="small" style="font-weight:700;margin-bottom:8px">Basic Info</legend>
+            <label for="fullName">Name</label>
+            <input id="fullName" name="fullName" type="text" placeholder="Your full name" autocomplete="name" />
+
+            <div class="row" style="margin-top:8px">
+              <div style="flex:1">
+                <label for="age">Age</label>
+                <input id="age" name="age" type="number" min="0" placeholder="e.g., 29" />
+              </div>
+              <div style="flex:1">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender">
+                  <option value="">Prefer not to say</option>
+                  <option>Female</option>
+                  <option>Male</option>
+                  <option>Non-binary</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="section" aria-labelledby="prefsLegend">
+            <legend id="prefsLegend" class="small" style="font-weight:700;margin-bottom:8px">Preferences</legend>
+            <label for="language">Preferred language / style</label>
+            <select id="language" name="language">
+              <option value="en">English (Standard)</option>
+              <option value="en-kenya">Kenyan English</option>
+              <option value="sw">Swahili</option>
+              <option value="mix">English + Swahili</option>
+            </select>
+
+            <label for="affirmTime" style="margin-top:8px">Daily affirmation time</label>
+            <input id="affirmTime" name="affirmTime" type="time" />
+
+            <label style="margin-top:8px">Topics of interest</label>
+            <div class="row">
+              <label class="chip"><input type="checkbox" name="topics" value="stress" /> Stress</label>
+              <label class="chip"><input type="checkbox" name="topics" value="relationships" /> Relationships</label>
+              <label class="chip"><input type="checkbox" name="topics" value="sleep" /> Sleep</label>
+            </div>
+          </fieldset>
+        </details>
+
+        <details class="settings-group">
+          <summary>
+            <h2>Wellness & Data Privacy</h2>
+            <p class="summary-text">Mood tracking, stress level, and data sharing controls.</p>
+          </summary>
+
+          <fieldset class="section" aria-labelledby="statusLegend">
+            <legend id="statusLegend" class="small" style="font-weight:700;margin-bottom:8px">Mental Health Status (optional)</legend>
+
+            <label>Active mood tracking</label>
+            <div class="row" style="align-items:center">
+              <label class="chip"><input type="radio" name="moodFreq" value="daily" /> Daily</label>
+              <label class="chip"><input type="radio" name="moodFreq" value="weekly" /> Weekly</label>
+              <label class="chip"><input type="radio" name="moodFreq" value="" /> Off</label>
+            </div>
+
+            <label for="stress" style="margin-top:10px">Self-reported stress (1–10) - <span id="stressVal">5</span></label>
+            <input id="stress" name="stress" type="range" min="1" max="10" value="5" class="range" />
+            
+            <label style="margin-top:8px">Favorite coping methods</label>
+            <div class="row">
+              <label class="chip"><input type="checkbox" name="coping" value="journaling" /> Journaling</label>
+              <label class="chip"><input type="checkbox" name="coping" value="meditation" /> Meditation</label>
+              <label class="chip"><input type="checkbox" name="coping" value="walks" /> Walks</label>
+            </div>
+          </fieldset>
+          
+          <fieldset class="section" aria-labelledby="activityLegend">
+            <legend id="activityLegend" class="small" style="font-weight:700;margin-bottom:8px">Data & History</legend>
+            <div class="row" style="justify-content:space-between">
+                <div>
+                  <label class="small" style="margin-bottom:0">Chat history</label>
+                  <div class="small">Allows AI to learn from previous sessions.</div>
+                </div>
+                <label class="chip"><input type="checkbox" id="saveHistory" /> Save conversations</label>
+            </div>
+            
+            <div class="row" style="align-items:center; margin-top:12px; justify-content:space-between">
+                <div>
+                  <label class="small" style="margin-bottom:0">Journal privacy</label>
+                  <div class="small">Who can view your journal entries.</div>
+                </div>
+                <div class="row">
+                  <label class="chip"><input type="radio" name="journalPrivacy" value="private" /> Private</label>
+                  <label class="chip"><input type="radio" name="journalPrivacy" value="anonymized" /> Anonymized</label>
+                </div>
+            </div>
+            <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center">
+                <label for="anonData" class="small" style="margin-bottom:0">Share anonymized usage data</label>
+                <label class="chip"><input type="checkbox" id="anonData" /> Allow</label>
+            </div>
+          </fieldset>
+
+        </details>
+        
+        <details class="settings-group">
+          <summary>
+            <h2>Emergency Contacts</h2>
+            <p class="summary-text">Trusted contacts for escalation purposes.</p>
+          </summary>
+          
+          <fieldset class="section" aria-labelledby="emergLegend">
+            <legend id="emergLegend" class="small" style="font-weight:700;margin-bottom:8px">Add trusted contact</legend>
+            <div class="row">
+              <input id="trustedName" placeholder="Name" type="text" />
+              <input id="trustedPhone" placeholder="+2547XXXXXXXX" type="text" />
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+              <button type="button" id="addTrusted" class="btn-ghost">Add Contact</button>
+              <div class="small" id="trustedCount" style="color:var(--accent)">0 Contacts Saved</div>
+            </div>
+            
+            <div class="trusted-contacts-display" style="margin-top:16px;">
+              <div class="small" style="font-weight:700; margin-bottom: 8px;">Saved Contacts</div>
+              <div id="trustedList" class="trusted-list" aria-live="polite"></div>
+              <div class="small" style="margin-top: 8px;">These contacts are used only during critical escalation events.</div>
+            </div>
+          </fieldset>
+        </details>
+        
+        <details class="settings-group">
+          <summary>
+            <h2>Security & App Settings</h2>
+            <p class="summary-text">Profile photo, login methods, and app behaviors.</p>
+          </summary>
+          
+          <div class="section row split">
+              <fieldset style="flex:1" aria-labelledby="securityLegend">
+                <legend id="securityLegend" class="small" style="font-weight:700;margin-bottom:8px">Security</legend>
+                <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+                  <div>
+                    <label class="small" style="margin-bottom:0">Enable biometric login</label>
+                    <div class="small">(Requires platform support)</div>
+                  </div>
+                  <label class="chip" style="margin-bottom:0"><input type="checkbox" id="biometric" /> <span class="small">On</span></label>
+                </div>
+              </fieldset>
+
+              <div class="avatar-wrap" style="flex:1">
+                <div class="avatar" id="avatarPreview" aria-hidden="true">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" fill="#fff" opacity="0.95"/><path d="M4 20a8 8 0 0 1 16 0" stroke="#fff" stroke-opacity="0.9" stroke-width="1.2" stroke-linecap="round"/></svg>
+                </div>
+                <label for="avatarInput" class="small" style="cursor:pointer; font-weight: 700;">Change Profile Photo</label>
+                <input id="avatarInput" type="file" accept="image/*" style="display:none;" />
+                <div class="small">Recommended: square image.</div>
+              </div>
+          </div>
+        </details>
+
+        <div class="actions" style="margin-top:24px">
+          <button type="button" id="resetBtn" class="btn-ghost">Reset to Defaults</button>
+          <button type="submit" class="btn">Save All Changes</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+<script>
+// Your existing JavaScript functions and initialization logic go here.
+// NOTE: You will need to update the `loadTrusted`, `saveTrusted`, and `renderTrusted` 
+// functions to correctly update the new `trustedCount` element.
+
+  const KEY = 'convai_profile_v1';
+  const form = document.getElementById('settingsForm');
+  const stress = document.getElementById('stress');
+  const stressVal = document.getElementById('stressVal');
+  const avatarInput = document.getElementById('avatarInput');
+  const avatarPreview = document.getElementById('avatarPreview');
+  const addTrusted = document.getElementById('addTrusted');
+  const trustedName = document.getElementById('trustedName');
+  const trustedPhone = document.getElementById('trustedPhone');
+  const trustedListEl = document.getElementById('trustedList');
+  const trustedCount = document.getElementById('trustedCount');
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      Object.entries(data).forEach(([k,v]) => {
+        const el = document.getElementById(k);
+        if (!el) return;
+        if (el.type === 'checkbox') el.checked = !!v;
+        else if (el.type === 'radio' || el.tagName === 'SELECT') {
+          if (el.type === 'radio') {
+            const r = document.querySelector(`[name="${el.name}"][value="${v}"]`);
+            if (r) r.checked = true;
+          } else el.value = v;
+        } else el.value = v;
+      });
+      // custom fields
+      if (data.trusted && Array.isArray(data.trusted)) {
+        renderTrusted(data.trusted);
+      }
+      if (data.avatar) setAvatar(data.avatar);
+      if (data.stress) { stress.value = data.stress; stressVal.textContent = data.stress; }
+    } catch(e){ console.warn(e) }
+  }
+
+  function save(data) {
+    localStorage.setItem(KEY, JSON.stringify(data));
+    // Also update the separate trusted key (for compatibility with your original code)
+    saveTrusted(data.trusted || []);
+  }
+
+  function snapshot() {
+    const topics = Array.from(document.querySelectorAll('input[name="topics"]:checked')).map(i=>i.value);
+    const coping = Array.from(document.querySelectorAll('input[name="coping"]:checked')).map(i=>i.value);
+    const moodFreq = (document.querySelector('input[name="moodFreq"]:checked') || {}).value || '';
+    const journalPrivacy = (document.querySelector('input[name="journalPrivacy"]:checked') || {}).value || '';
+    const data = {
+      fullName: document.getElementById('fullName').value || '',
+      age: document.getElementById('age').value || '',
+      gender: document.getElementById('gender').value || '',
+      language: document.getElementById('language').value || '',
+      affirmTime: document.getElementById('affirmTime').value || '',
+      topics,
+      moodFreq,
+      stress: stress.value,
+      coping,
+      journalPrivacy,
+      saveHistory: document.getElementById('saveHistory').checked,
+      biometric: document.getElementById('biometric').checked,
+      anonData: document.getElementById('anonData').checked,
+      trusted: loadTrusted(), // Loads the trusted list from the separate key
+      avatar: localStorage.getItem(KEY + '_avatar') || null
+    };
+    return data;
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const data = snapshot();
+    save(data);
+    alert('Settings saved.');
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    if (!confirm('Reset settings to defaults?')) return;
+    localStorage.removeItem(KEY);
+    localStorage.removeItem(KEY + '_avatar');
+    localStorage.removeItem(KEY + '_trusted'); // Ensure trusted key is also reset
+    location.reload();
+  });
+
+  stress.addEventListener('input', () => stressVal.textContent = stress.value);
+
+  // avatar handling (store as dataURL)
+  avatarInput.addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      localStorage.setItem(KEY + '_avatar', dataUrl);
+      setAvatar(dataUrl);
+    };
+    reader.readAsDataURL(f);
+  });
+
+  function setAvatar(dataUrl) {
+    avatarPreview.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    img.alt = 'Profile photo';
+    avatarPreview.appendChild(img);
+  }
+
+  // Trusted contacts management (Keep the separate key for backward compatibility)
+  function loadTrusted() {
+    try {
+      const raw = localStorage.getItem(KEY + '_trusted');
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  }
+
+  function saveTrusted(list) {
+    localStorage.setItem(KEY + '_trusted', JSON.stringify(list));
+  }
+
+  function renderTrusted(list) {
+    trustedListEl.innerHTML = '';
+    list.forEach((t, i) => {
+      const el = document.createElement('div');
+      el.className = 'trusted-item';
+      el.innerHTML = `<div><strong>${escapeHtml(t.name)}</strong><div class="small">${escapeHtml(t.phone)}</div></div>
+                      <div style="display:flex;gap:8px"><a class="small" href="tel:${t.phone}" style="color:var(--accent);text-decoration:none">Call</a>
+                      <button class="btn-ghost" data-i="${i}">Remove</button></div>`;
+      trustedListEl.appendChild(el);
+    });
+    trustedCount.textContent = `${list.length} Contacts Saved`; // 👈 UPDATED DISPLAY
+    // attach remove handlers
+    trustedListEl.querySelectorAll('.btn-ghost').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const idx = Number(e.currentTarget.dataset.i);
+        const arr = loadTrusted();
+        arr.splice(idx,1);
+        saveTrusted(arr);
+        renderTrusted(arr);
+      });
+    });
+  }
+
+  addTrusted.addEventListener('click', () => {
+    const name = trustedName.value.trim();
+    const phone = trustedPhone.value.trim();
+    if (!name || !phone) return alert('Enter both name and phone number.');
+    const list = loadTrusted();
+    list.push({ name, phone });
+    saveTrusted(list);
+    trustedName.value = '';
+    trustedPhone.value = '';
+    renderTrusted(list);
+  });
+
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  // initialize
+  (function init() {
+    // populate radios / selects with defaults if empty
+    if (!localStorage.getItem(KEY)) {
+      const defaults = { language:'en', affirmTime:'08:00', stress:5, moodFreq:'', journalPrivacy:'private', trusted:[] };
+      localStorage.setItem(KEY, JSON.stringify(defaults));
+    }
+    // ensure trusted list stored as separate key if absent
+    if (!localStorage.getItem(KEY + '_trusted')) localStorage.setItem(KEY + '_trusted', JSON.stringify([]));
+    load();
+    renderTrusted(loadTrusted());
+  })();
+</script>
+</body>
+</html>

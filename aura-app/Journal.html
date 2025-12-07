@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Journal — Conversational AI</title>
+<style>
+:root {
+  --bg:#3b1534;
+  --panel:#5a2450;
+  --card:#6f3b64;
+  --pill:#e6d9e6;
+  --accent:#ff2fa6;
+  --muted:#d9c9dc;
+  --white:#ffffff;
+  --hover:#ff4db8;
+  --shadow:0 8px 20px rgba(0,0,0,0.4);
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, "Helvetica Neue", Arial;
+  background: var(--bg);
+  color: var(--white);
+}
+
+.wrap {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  box-sizing: border-box;
+}
+
+.panel {
+  width: 100%;
+  max-width: 1000px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: var(--shadow);
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--muted);
+  padding: 8px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn-ghost:hover {
+  background: rgba(255,47,166,0.2);
+  color: var(--white);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 20px;
+}
+
+.entries {
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.02);
+  max-height: 560px;
+  overflow-y: auto;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+}
+
+.entry {
+  background: rgba(255,255,255,0.06);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  border-left: 4px solid rgba(255,47,166,0.5);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.entry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.5);
+}
+
+.entry h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.entry p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.composer {
+  padding: 16px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.01));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+}
+
+textarea {
+  width: 100%;
+  min-height: 140px;
+  max-height: 260px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 0;
+  resize: vertical;
+  outline: none;
+  background: rgba(0,0,0,0.12);
+  color: var(--white);
+  font-size: 14px;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.btn {
+  background: linear-gradient(90deg, var(--accent), #ff5aa8);
+  color: #fff;
+  border: 0;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 14px rgba(255,47,166,0.4);
+}
+
+.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 40px 12px;
+}
+
+.date-head {
+  font-weight: 700;
+  margin: 18px 0 8px;
+}
+
+@media (max-width:920px){
+  .layout{grid-template-columns:1fr; max-height:none;}
+}
+</style>
+<script src="theme-manager.js"></script>
+</head>
+<body>
+<main class="wrap" role="main" aria-labelledby="journalTitle">
+<section class="panel" aria-labelledby="journalTitle">
+  <div class="header">
+    <div>
+      <div id="journalTitle" class="title">📓 Journal</div>
+      <div class="sub">Write, reflect, and review past entries. Journaling helps you declutter and have a clear mind.</div>
+    </div>
+    <div>
+      <a href="Dashboard.html" class="btn-ghost">Back</a>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="entries" id="entries" aria-live="polite" aria-atomic="false">
+      <!-- entries populated here -->
+    </div>
+
+    <aside class="composer" aria-label="New journal entry">
+      <label for="note" style="font-weight:600">New entry ✍️</label>
+      <textarea id="note" placeholder="Write about your day, feelings or thoughts..."></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="meta" id="draftInfo"></div>
+        <div class="controls">
+          <button id="clearBtn" class="btn-ghost"> Clear</button>
+          <button id="saveBtn" class="btn">Save Entry</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+</main>
+
+<script>
+  const KEY = 'convai_journal_v1';
+  const entriesEl = document.getElementById('entries');
+  const noteEl = document.getElementById('note');
+  const saveBtn = document.getElementById('saveBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const draftInfo = document.getElementById('draftInfo');
+
+  function loadEntries() {
+    try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } 
+    catch(e){ return []; }
+  }
+
+  function saveEntries(list) { localStorage.setItem(KEY, JSON.stringify(list)); }
+
+  function formatDate(ts) {
+    const d = new Date(ts);
+    return d.toLocaleDateString(undefined, {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  }
+
+  function render() {
+    const items = loadEntries().slice().reverse();
+    entriesEl.innerHTML = '';
+    if (!items.length) {
+      entriesEl.innerHTML = '<div class="empty">No journal entries yet. Write your first entry on the right.</div>';
+      return;
+    }
+    items.forEach(item => {
+      const wrap = document.createElement('article');
+      wrap.className = 'entry';
+      wrap.innerHTML = `
+        <h3>🗓 ${formatDate(item.ts)}</h3>
+        <p>${escapeHtml(item.text).replace(/\n/g,'<br>')}</p>
+        <div class="meta">${new Date(item.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})} 
+          · <button data-id="${item.ts}" class="btn-ghost" style="font-size:12px">🗑 Delete</button>
+        </div>
+      `;
+      entriesEl.appendChild(wrap);
+    });
+
+    entriesEl.querySelectorAll('.btn-ghost').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.dataset.id;
+        const list = loadEntries().filter(it => String(it.ts) !== String(id));
+        saveEntries(list);
+        render();
+      });
+    });
+  }
+
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  const DRAFT = 'convai_journal_draft';
+  noteEl.value = sessionStorage.getItem(DRAFT) || '';
+  noteEl.addEventListener('input', () => {
+    sessionStorage.setItem(DRAFT, noteEl.value);
+    draftInfo.textContent = noteEl.value ? 'Draft saved locally' : '🧹 Draft cleared';
+  });
+
+  saveBtn.addEventListener('click', () => {
+    const text = noteEl.value.trim();
+    if (!text) return alert('Please write something before saving.');
+    const list = loadEntries();
+    list.push({ ts: Date.now(), text });
+    saveEntries(list);
+    sessionStorage.removeItem(DRAFT);
+    noteEl.value = '';
+    draftInfo.textContent = 'Saved';
+    render();
+  });
+
+  clearBtn.addEventListener('click', () => {
+    if (confirm('Clear current draft?')) {
+      noteEl.value = '';
+      sessionStorage.removeItem(DRAFT);
+      draftInfo.textContent = '🧹 Draft cleared';
+    }
+  });
+
+  if (!loadEntries().length) {
+    saveEntries([
+      { ts: Date.now() - 86400000*2, text: 'Today I felt a mix of hope and anxiety. I took a walk and it helped.' },
+      { ts: Date.now() - 86400000, text: 'I spoke with a friend and felt supported.' }
+    ]);
+  }
+
+  render();
+</script>
+</body>
+</html>

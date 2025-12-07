@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura: Your AI Mental Health Companion</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons for aesthetic vectors -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Define the custom color palette and font using Tailwind's configuration */
+        :root {
+            --color-bg: #1A0A17; /* Darker purple */
+            --color-panel: #2B1528;
+            --color-accent: #FF5AA8; /* Bright pink/fuchsia */
+            --color-success: #3DCC91; /* Teal green for positive status */
+            --color-muted: #D9C9DC;
+            --color-heading: #FFFFFF;
+        }
+
+        /* Custom configuration for the theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-muted);
+            line-height: 1.6;
+        }
+
+        /* Gradient background for hero section */
+        .hero-bg {
+            background: radial-gradient(at 10% 10%, #4B1A45 0%, transparent 50%),
+                        radial-gradient(at 90% 70%, #2B1528 0%, transparent 60%);
+        }
+
+        /* Custom glow effect for the main CTA */
+        .btn-glow {
+            box-shadow: 0 0 40px rgba(255, 90, 168, 0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 60px rgba(255, 90, 168, 0.6);
+            transform: translateY(-2px);
+        }
+
+        /* Keyframe for floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .float-animation {
+            animation: float 5s ease-in-out infinite;
+        }
+        
+        /* Keyframe for slide in from bottom */
+        /* Increased duration to 1.2s for better readability */
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in {
+            animation: slideInUp 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        /* Initial hidden state for scroll reveal */
+        .section-hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            /* Add a transition property for smoother removal of the hidden state */
+            transition: opacity 0.5s, transform 0.5s; 
+        }
+        
+        /* Apply text gradient to titles */
+        .text-gradient {
+            background: linear-gradient(135deg, var(--color-heading) 0%, var(--color-accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Style the custom sections and cards */
+        .section-card {
+            background-color: var(--color-panel);
+            border: 1px solid rgba(255, 90, 168, 0.1);
+            transition: all 0.3s;
+        }
+        .section-card:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(255, 90, 168, 0.2);
+        }
+        
+        /* Specific comparison table styling */
+        .comparison-table th, .comparison-table td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .comparison-table th {
+            background-color: #381b34;
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+
+<!-- NAVIGATION -->
+<nav class="sticky top-0 z-50 bg-bg/90 backdrop-blur-md shadow-lg shadow-black/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <a href="#" class="text-2xl font-extrabold tracking-wider logo transition duration-300 hover:scale-105"
+           style="background: linear-gradient(90deg, var(--color-accent), #FF80BD); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            <i data-lucide="sparkles" class="inline-block w-6 h-6 mr-1" style="color:var(--color-accent)"></i> Aura
+        </a>
+        <div class="hidden md:flex items-center space-x-6 text-sm font-semibold">
+            <a href="#intro" class="text-muted hover:text-accent transition duration-200">Intro</a>
+            <a href="#problem" class="text-muted hover:text-accent transition duration-200">The Problem</a>
+            <a href="#comparison" class="text-muted hover:text-accent transition duration-200">The Difference</a>
+            <a href="#tech" class="text-muted hover:text-accent transition duration-200">Technology</a>
+            <a href="Signup.html"><button class="px-5 py-2.5 rounded-full bg-gradient-to-r from-accent to-light-pink text-white font-bold transition duration-300 shadow-xl btn-glow hover:shadow-2xl hover:scale-[1.02]">
+                Start Talking Today →
+            </button></a>
+        </div>
+        <!-- Mobile Menu Button (omitted for single-file simplicity, assuming desktop-first view) -->
+    </div>
+</nav>
+
+<!-- HERO SECTION - Keep this separate from the scroll reveal -->
+<header class="hero-bg min-h-[85vh] flex items-center justify-center pt-20 pb-12 overflow-hidden relative">
+    <!-- The hero section uses the 'animate-in' class directly, which is fine -->
+    <div class="max-w-4xl text-center px-4 animate-in">
+        <h1 class="text-5xl sm:text-7xl font-black mb-4 leading-tight sm:leading-snug tracking-tighter text-gradient">
+            Aura: Your AI Mental Health Buddy 
+            <span class="inline-block float-animation" style="color:var(--color-accent); font-size: 1.1em;">
+                <i data-lucide="heart-handshake" class="inline-block w-12 h-12 sm:w-16 sm:h-16"></i>
+            </span>
+        </h1>
+        <p class="text-xl sm:text-2xl text-muted/80 mb-10 font-medium max-w-3xl mx-auto">
+            24/7 Support That Actually Gets You. Culturally Intelligent. Affordable. Zero Judgment.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+            <a href="Signup.html"> <button class="px-8 py-3 rounded-full bg-gradient-to-r from-accent to-light-pink text-white font-bold text-lg btn-glow">
+                Start Your Journey
+            </button><a/>
+            <a href="#tech" class="text-muted hover:text-accent transition duration-200"><button class="px-8 py-3 rounded-full bg-gradient-to-r from-accent to-light-pink border-2 border-accent text-accent font-bold text-lg hover:bg-accent/10 transition duration-300">
+                <i data-lucide="eye" class="inline-block w-5 h-5 mr-2"></i> See How It Works
+            </button><a/>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 max-w-4xl mx-auto">
+            <div class="section-card p-6 rounded-xl text-left hover:scale-[1.03]">
+                <strong class="text-4xl block mb-2 font-extrabold text-accent">90%</strong>
+                <span class="text-sm font-semibold text-muted/70">Need Help But Can't Access It</span>
+            </div>
+            <div class="section-card p-6 rounded-xl text-left hover:scale-[1.03]">
+                <strong class="text-4xl block mb-2 font-extrabold text-white">∞</strong>
+                <span class="text-sm font-semibold text-muted/70">Availability 24/7/365</span>
+            </div>
+            <div class="section-card p-6 rounded-xl text-left hover:scale-[1.03]">
+                <strong class="text-4xl block mb-2 font-extrabold" style="color:var(--color-success)">0$</strong>
+                <span class="text-sm font-semibold text-muted/70">Affordable , No Hidden Costs</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- INTRO: THE CRISIS SECTION -->
+<!-- Added section-hidden class for initial state -->
+<section id="intro" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto section-hidden">
+    <h2 class="text-4xl sm:text-5xl font-extrabold mb-4 text-gradient">The Silent Crisis We Are Solving</h2>
+    <p class="text-lg text-muted/90 mb-12 max-w-3xl">
+        In many communities in Africa, the need for mental health support is overwhelming, but access is nearly impossible. Aura closes the gap.
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+        <!-- Text Content -->
+        <div>
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold mb-2 text-heading flex items-center">
+                    <i data-lucide="smartphone" class="w-6 h-6 mr-3 text-accent"></i> The Access Gap
+                </h3>
+                <p class="text-muted/80">
+                    While <strong>internet connectivity explodes</strong>, the number of qualified mental health professionals does not. In many areas, the ratio is less than one therapist per half-million people.
+                </p>
+            </div>
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold mb-2 text-heading flex items-center">
+                    <i data-lucide="dollar-sign" class="w-6 h-6 mr-3 text-accent"></i> The Cost Barrier
+                </h3>
+                <p class="text-muted/80">
+                    Traditional therapy is a luxury. We believe fundamental health should be Affordable. Aura is funded by organizations to keep support accessible to everyone.
+                </p>
+            </div>
+            <div class="p-6 rounded-xl bg-accent/10 border-l-4 border-accent">
+                <p class="font-bold text-lg text-white mb-2">Aura's Promise:</p>
+                <p class="text-sm text-muted">A culturally sensitive, immediate, and 100% private solution for those moments when you need to talk, without fear of judgment or financial strain.</p>
+            </div>
+        </div>
+
+        <!-- Visual / Key Feature -->
+        <div class="section-card p-10 rounded-2xl min-h-[350px] flex flex-col justify-center items-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-accent/5 rounded-2xl animate-pulse" style="animation-duration: 4s;"></div>
+            <div class="relative z-10 text-center">
+                <i data-lucide="globe" class="w-20 h-20 text-accent/80 mb-4 float-animation"></i>
+                <h4 class="text-3xl font-extrabold text-heading mb-2">Localized Care</h4>
+                <p class="text-muted/80">Understands Swahili, Sheng, local dialects, and cultural context.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- THE PROBLEM & OBJECTIVES SECTION (Combined and enhanced) -->
+<!-- Added section-hidden class for initial state -->
+<section id="problem" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto section-hidden">
+    <h2 class="text-4xl sm:text-5xl font-extrabold mb-4 text-gradient">Solving the 3 Major Barriers to Mental Wellness</h2>
+    <p class="text-lg text-muted/90 mb-12 max-w-3xl">
+        We tackle shame, distance, and cost head-on with a three-pronged approach powered by secure AI technology.
+    </p>
+
+    <!-- Problem & Solution Cards -->
+    <div class="grid md:grid-cols-3 gap-8">
+        <!-- BARRIER 1: Shame & Stigma -->
+        <div class="section-card p-8 rounded-xl border-t-4 border-accent/70">
+            <i data-lucide="mask" class="w-8 h-8 text-accent mb-3"></i>
+            <h3 class="text-xl font-bold mb-3 text-heading">Barrier 1: Social Stigma</h3>
+            <p class="text-sm text-muted/80 mb-4">Fear of judgment prevents people from seeking help publicly or even discussing their struggles.</p>
+            <div class="mt-4 p-3 rounded-lg bg-accent/20">
+                <strong class="text-accent text-sm">Aura's Fix:</strong> 100% anonymous, encrypted, and private chat environment.
+            </div>
+        </div>
+        
+        <!-- BARRIER 2: Distance & Time -->
+        <div class="section-card p-8 rounded-xl border-t-4 border-accent/70">
+            <i data-lucide="bus" class="w-8 h-8 text-accent mb-3"></i>
+            <h3 class="text-xl font-bold mb-3 text-heading">Barrier 2: Access & Distance</h3>
+            <p class="text-sm text-muted/80 mb-4">Real therapists are scarce and geographically concentrated. Crisis moments don't follow office hours.</p>
+            <div class="mt-4 p-3 rounded-lg bg-accent/20">
+                <strong class="text-accent text-sm">Aura's Fix:</strong> Instant, 24/7 support accessible from any low-bandwidth smartphone.
+            </div>
+        </div>
+
+        <!-- BARRIER 3: Cost & Expense -->
+        <div class="section-card p-8 rounded-xl border-t-4 border-accent/70">
+            <i data-lucide="wallet" class="w-8 h-8 text-accent mb-3"></i>
+            <h3 class="text-xl font-bold mb-3 text-heading">Barrier 3: Financial Burden</h3>
+            <p class="text-sm text-muted/80 mb-4">One session can cost more than weekly earnings, making ongoing care impossible for the average person.</p>
+            <div class="mt-4 p-3 rounded-lg bg-accent/20">
+                <strong class="text-accent text-sm">Aura's Fix:</strong> Completely Affordable service, forever, focused on community impact.
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- COMPARISON: WHY AURA IS DIFFERENT -->
+<!-- Added section-hidden class for initial state -->
+<section id="comparison" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto section-hidden">
+    <h2 class="text-4xl sm:text-5xl font-extrabold mb-4 text-gradient">Global Apps vs. Aura: The Cultural Difference</h2>
+    <p class="text-lg text-muted/90 mb-12 max-w-3xl">
+        We are not a copied solution. We are custom-built to understand the local context, values, and language.
+    </p>
+
+    <div class="section-card rounded-2xl overflow-hidden shadow-2xl">
+        <table class="comparison-table w-full text-sm text-left">
+            <thead>
+                <tr>
+                    <th class="py-4 px-6 rounded-tl-xl text-lg font-bold">Feature</th>
+                    <th class="py-4 px-6 text-lg font-bold text-center">Typical Global App</th>
+                    <th class="py-4 px-6 rounded-tr-xl text-lg font-bold text-center">Aura (Our Solution)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="py-4 px-6 text-white font-semibold">Understands Local Language & Dialects</td>
+                    <td class="py-4 px-6 text-center text-red-400 font-bold text-xl">✗</td>
+                    <td class="py-4 px-6 text-center" style="color:var(--color-success)">✓</td>
+                </tr>
+                <tr>
+                    <td class="py-4 px-6 text-white font-semibold">Culturally Intelligent Guidance (e.g., family pressure)</td>
+                    <td class="py-4 px-6 text-center text-red-400 font-bold text-xl">✗</td>
+                    <td class="py-4 px-6 text-center" style="color:var(--color-success)">✓</td>
+                </tr>
+                <tr>
+                    <td class="py-4 px-6 text-white font-semibold">Crisis Intervention & Local Referral</td>
+                    <td class="py-4 px-6 text-center text-red-400 font-bold text-xl">✗</td>
+                    <td class="py-4 px-6 text-center" style="color:var(--color-success)">✓</td>
+                </tr>
+                <tr>
+                    <td class="py-4 px-6 text-white font-semibold">Completely Affordable Pricing Model</td>
+                    <td class="py-4 px-6 text-center text-red-400 font-bold text-xl">✗ (Affordium)</td>
+                    <td class="py-4 px-6 text-center" style="color:var(--color-success)">✓</td>
+                </tr>
+                <tr>
+                    <td class="py-4 px-6 text-white font-semibold">Emotion Detection & Cognitive Behavioral Tools</td>
+                    <td class="py-4 px-6 text-center" style="color:var(--color-success)">✓</td>
+                    <td class="py-4 px-6 text-center" style="color:var(--color-success)">✓</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- TECHNOLOGY & SAFETY FRAMEWORK -->
+<!-- Added section-hidden class for initial state -->
+<section id="tech" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto section-hidden">
+    <h2 class="text-4xl sm:text-5xl font-extrabold mb-4 text-gradient">The Core: Technology, Intelligence, and Safety</h2>
+    <p class="text-lg text-muted/90 mb-12 max-w-3xl">
+        We use a layered framework, leveraging powerful AI responsibly, with safety as the primary gate.
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-12">
+        <!-- Conceptual Framework (Safety Layer) -->
+        <div>
+            <h3 class="text-3xl font-bold mb-6 text-heading flex items-center">
+                <i data-lucide="shield-half" class="w-7 h-7 mr-3 text-success"></i> The Three-Layer Safety System
+            </h3>
+            <div class="space-y-6">
+                <!-- Layer 1 -->
+                <div class="p-6 rounded-xl section-card border-l-4 border-accent/50">
+                    <span class="text-3xl font-black block mb-1 text-accent">1. Input</span>
+                    <h4 class="text-lg font-semibold text-white mb-1">User Expression</h4>
+                    <p class="text-sm text-muted/80">You share your feelings via text, at any time of day or night.</p>
+                </div>
+                <!-- Layer 2 (Critical Safety Check) -->
+                <div class="p-6 rounded-xl bg-success/10 border-l-4 border-success shadow-xl hover:scale-[1.01] transition duration-300">
+                    <span class="text-3xl font-black block mb-1" style="color:var(--color-success)">2. Guardrail (The Life-Saver)</span>
+                    <h4 class="text-xl font-bold text-white mb-1">Immediate Crisis Detection</h4>
+                    <p class="text-sm text-muted/80">Every message passes through a dedicated, highly tuned safety model. If a crisis (suicidal ideation, self-harm) is detected, the chat is paused, and you are led to immediate, localized emergency resources provided in the app, bypassing the main AI.</p>
+                </div>
+                <!-- Layer 3 -->
+                <div class="p-6 rounded-xl section-card border-l-4 border-accent/50">
+                    <span class="text-3xl font-black block mb-1 text-accent">3. Response</span>
+                    <h4 class="text-lg font-semibold text-white mb-1">Culturally Smart AI Interaction</h4>
+                    <p class="text-sm text-muted/80">Only safe inputs reach the main AI, which uses actual context for compassionate, personalized, and contextually appropriate responses.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tech Stack -->
+        <div>
+            <h3 class="text-3xl font-bold mb-6 text-heading flex items-center">
+                <i data-lucide="cpu" class="w-7 h-7 mr-3 text-success"></i> Our Robust Tech Stack
+            </h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="section-card p-5 rounded-xl text-center hover:bg-success/10">
+                    <i data-lucide="brain" class="w-8 h-8 mx-auto mb-2 text-success"></i>
+                    <strong class="block text-white font-bold">Smart AI</strong>
+                    <small class="text-xs text-muted/70">LLM Core & Intelligence</small>
+                </div>
+                <div class="section-card p-5 rounded-xl text-center hover:bg-success/10">
+                    <i data-lucide="lock" class="w-8 h-8 mx-auto mb-2 text-success"></i>
+                    <strong class="block text-white font-bold">Efficient Data Storage</strong>
+                    <small class="text-xs text-muted/70">Real-Time Data & Secure Storage</small>
+                </div>
+                <div class="section-card p-5 rounded-xl text-center hover:bg-success/10">
+                    <i data-lucide="user-check" class="w-8 h-8 mx-auto mb-2 text-success"></i>
+                    <strong class="block text-white font-bold">High Level Security</strong>
+                    <small class="text-xs text-muted/70">Secure User Sessions</small>
+                </div>
+                <div class="section-card p-5 rounded-xl text-center hover:bg-success/10">
+                    <i data-lucide="maximize" class="w-8 h-8 mx-auto mb-2 text-success"></i>
+                    <strong class="block text-white font-bold">Scalable Cloud</strong>
+                    <small class="text-xs text-muted/70">Reliable, Low-Latency Service</small>
+                </div>
+            </div>
+            
+            <div class="mt-8 p-6 rounded-xl bg-panel border-l-4 border-accent">
+                <h4 class="text-lg font-bold text-white mb-2">Privacy is Non-Negotiable</h4>
+                <p class="text-sm text-muted/80">All conversation data is anonymized, encrypted end-to-end, and handled with the highest level of data privacy compliance. Your story is yours alone.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FINAL CALL TO ACTION -->
+<!-- Added section-hidden class for initial state -->
+<section class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto section-hidden">
+    <div class="bg-panel/70 rounded-3xl p-10 sm:p-16 text-center border-2 border-accent/30 shadow-2xl shadow-accent/10 relative overflow-hidden">
+        <h3 class="text-4xl sm:text-5xl font-extrabold text-heading mb-4 text-gradient">
+            Ready to Stop Suffering Alone?
+        </h3>
+        <p class="text-lg text-muted/80 max-w-2xl mx-auto mb-8">
+            Take the first step towards feeling better. Aura is here, waiting for you—Affordable, private, and judgment-free.
+        </p>
+        <a href="Signup.html"><button class="px-10 py-4 rounded-full bg-gradient-to-r from-accent to-light-pink text-white font-bold text-xl btn-glow">
+            Start Your Chat Now →
+        </button></a>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-panel/50 border-t border-white/10 py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="text-xl font-extrabold tracking-wider mb-4"
+             style="background: linear-gradient(90deg, var(--color-accent), #FF80BD); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Aura 💗 Technology with a Heartbeat
+        </div>
+        <p class="text-sm text-muted/60 mb-2">
+            A localized, ethical, and scalable mental health solution built for the community.
+        </p>
+        <p class="text-xs text-muted/50 mt-6">
+            © 2025 Aura Mental Health. All rights reserved. | <a href="#" class="text-accent hover:text-white transition">Privacy Policy</a> | <a href="#" class="text-accent hover:text-white transition">Terms of Service</a>
+        </p>
+    </div>
+</footer>
+
+<!-- Initialize Lucide icons and Scroll Reveal -->
+<script>
+    // Lucide Icons initialization
+    lucide.createIcons();
+    
+    // Simple Scroll Reveal Effect
+    const sections = document.querySelectorAll('section');
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // When intersecting, remove the hidden class and add the animation class
+                entry.target.classList.remove('section-hidden');
+                entry.target.classList.add('animate-in');
+                observer.unobserve(entry.target); // Stop observing once it's visible
+            }
+        });
+    }, { 
+        // Increased threshold allows the animation to start earlier
+        threshold: 0.1 
+    });
+
+    sections.forEach(section => {
+        // Add the initial hidden class
+        section.classList.add('section-hidden'); 
+        observer.observe(section);
+    });
+</script>
+
+</body>
+</html>

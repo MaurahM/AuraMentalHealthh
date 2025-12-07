@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Admin Dashboard — Conversational AI Therapist</title>
+
+<!-- Styles: matches project color system, responsive -->
+<style>
+  :root{
+    --bg:#3b1534;
+    --panel:#5a2450;
+    --card:#6f3b64;
+    --accent:#ff2fa6;
+    --muted:#d9c9dc;
+    --white:#ffffff;
+    --danger:#ff6b8a;
+    --success:#6be2a1;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--white)}
+  .wrap{max-width:1200px;margin:28px auto;padding:18px}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  header h1{margin:0;font-size:20px;letter-spacing:0.6px}
+  .top-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .btn{background:linear-gradient(90deg,var(--accent),#ff5aa8);border:0;color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);padding:8px 10px;border-radius:8px;cursor:pointer}
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));border-radius:12px;padding:14px;box-shadow:0 20px 50px rgba(0,0,0,0.45)}
+  .layout{display:grid;grid-template-columns:360px 1fr;gap:14px}
+  .card{background:var(--panel);border-radius:10px;padding:12px}
+  .search{display:flex;gap:8px;align-items:center}
+  input[type="search"], select{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);color:var(--white);padding:8px;border-radius:8px;outline:none}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:left;font-size:14px}
+  tr:hover td{background:rgba(255,255,255,0.015)}
+  .meta{font-size:12px;color:var(--muted)}
+  .small{font-size:13px;color:var(--muted)}
+  .user-row{display:flex;gap:10px;align-items:center}
+  .avatar{width:36px;height:36px;border-radius:999px;background:linear-gradient(180deg,#ff2fa6,#ff5aa8);display:flex;align-items:center;justify-content:center;font-weight:800}
+  .pill{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);font-weight:700}
+  .muted{color:var(--muted)}
+  .danger{background:var(--danger);color:#fff;border-radius:8px;padding:6px 8px;border:0}
+  .success{background:var(--success);color:#05231a;border-radius:8px;padding:6px 8px;border:0}
+  .flex{display:flex;align-items:center;gap:8px}
+  .controls{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+  .stats{display:flex;gap:12px;align-items:center}
+  .stat{background:rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px}
+  pre{white-space:pre-wrap;word-break:break-word;background:rgba(0,0,0,0.2);padding:10px;border-radius:8px;max-height:320px;overflow:auto}
+  /* responsive */
+  @media (max-width:960px){
+    .layout{grid-template-columns:1fr;gap:12px}
+    header{flex-direction:column;align-items:flex-start}
+    .top-actions{margin-left:0}
+  }
+</style>
+
+<!-- Chart.js for simple analytics -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Admin Dashboard</h1>
+      <div class="top-actions">
+        <div class="stats card" id="overviewStats" style="display:flex;gap:8px;align-items:center;padding:8px 12px;border-radius:10px">
+          <div class="stat"><strong id="statUsers">—</strong><div class="small muted">Users</div></div>
+          <div class="stat"><strong id="statChats">—</strong><div class="small muted">Chats</div></div>
+          <div class="stat"><strong id="statBanned">—</strong><div class="small muted">Banned</div></div>
+        </div>
+        <button id="refreshBtn" class="btn-ghost">Refresh</button>
+        <button id="exportUsers" class="btn">Export CSV</button>
+        <button id="impersonateBtn" class="btn-ghost" title="Impersonate selected user (requires server support)">Impersonate</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- LEFT: Users & Filters -->
+      <section class="card">
+        <div class="controls">
+          <div class="search" style="flex:1">
+            <input id="q" type="search" placeholder="Search email, phone, id..." />
+            <select id="roleFilter"><option value="">All roles</option><option value="user">User</option><option value="admin">Admin</option></select>
+            <select id="banFilter"><option value="">All</option><option value="banned">Banned</option><option value="active">Active</option></select>
+          </div>
+        </div>
+
+        <div style="margin-bottom:8px;display:flex;gap:8px;align-items:center">
+          <button id="selectAll" class="btn-ghost">Select All</button>
+          <button id="bulkBan" class="btn">Ban Selected</button>
+          <button id="bulkUnban" class="btn-ghost">Unban Selected</button>
+          <button id="bulkDelete" class="danger">Delete Selected</button>
+        </div>
+
+        <div style="max-height:560px;overflow:auto">
+          <table id="usersTable" aria-label="Users table">
+            <thead>
+              <tr><th style="width:36px"></th><th>User</th><th class="muted">Role</th><th class="muted">Status</th><th class="muted">Joined</th><th style="width:180px">Actions</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+          <div class="small muted" id="pageInfo">Page 1</div>
+          <div>
+            <button id="prevPage" class="btn-ghost">Prev</button>
+            <button id="nextPage" class="btn-ghost">Next</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Details / Chats / Analytics -->
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+          <div style="flex:1">
+            <h3 id="detailName" style="margin:0 0 6px">Select a user to view details</h3>
+            <div id="detailMeta" class="muted small">User details will appear here</div>
+          </div>
+          <div style="text-align:right">
+            <button id="editRole" class="btn-ghost">Change Role</button>
+            <button id="banToggle" class="btn danger" style="display:none">Ban</button>
+            <button id="deleteUser" class="danger" style="display:none">Delete</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 360px;gap:12px">
+          <div>
+            <div style="margin-bottom:8px;display:flex;gap:8px;align-items:center">
+              <button id="refreshChats" class="btn-ghost">Refresh Chats</button>
+              <button id="downloadJson" class="btn-ghost">Export JSON</button>
+              <button id="downloadPdf" class="btn-ghost">Export PDF</button>
+            </div>
+
+            <h4 style="margin:8px 0 6px">Conversation</h4>
+            <div id="chatList" style="max-height:420px;overflow:auto;border-radius:8px;padding:8px;background:rgba(255,255,255,0.02)"></div>
+
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <textarea id="adminMsg" placeholder="Send message as admin..." style="flex:1;padding:8px;border-radius:8px;background:rgba(0,0,0,0.12);border:0;color:var(--white)"></textarea>
+              <button id="sendAsAdmin" class="btn">Send</button>
+            </div>
+          </div>
+
+          <aside style="min-width:0">
+            <div class="card" style="padding:10px;margin-bottom:10px">
+              <div class="small muted">Latest activity</div>
+              <div id="latestActivity" class="small" style="margin-top:8px">—</div>
+            </div>
+
+            <div class="card" style="padding:10px;margin-bottom:10px">
+              <div class="small muted">Emotion breakdown</div>
+              <canvas id="emotionChart" style="height:160px;margin-top:8px"></canvas>
+            </div>
+
+            <div class="card" style="padding:10px">
+              <div class="small muted">Quick actions</div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+                <button id="forceLogout" class="btn-ghost">Force logout</button>
+                <button id="resetPassword" class="btn-ghost">Reset password</button>
+                <button id="flagUser" class="btn">Flag user</button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+<script>
+/*
+  Admin front-end:
+  - Uses JWT stored in localStorage 'userToken'
+  - Expects admin API endpoints:
+    GET  /api/admin/users?skip=&limit=&q=&role=&banned=
+    GET  /api/admin/users/:id
+    POST /api/admin/users/:id/ban    { ban: true|false, reason }
+    DELETE /api/admin/users/:id
+    GET  /api/admin/chats/:userId
+    GET  /api/admin/stats
+    GET  /api/admin/export/users
+    (Optional) POST /api/admin/impersonate/:id
+    (Optional) POST /api/admin/users/:id/message { text }
+  - All requests include Authorization: Bearer <token>
+*/
+
+
+
+const state = {
+  users: [],
+  selected: null,
+  page: 0, limit: 20,
+  total: 0,
+  filters: { q: '', role: '', banned: '' },
+};
+
+const el = selector => document.querySelector(selector);
+const tbody = el('#usersTable tbody');
+const qInp = el('#q'); const roleFilter = el('#roleFilter'); const banFilter = el('#banFilter');
+const statUsers = el('#statUsers'); const statChats = el('#statChats'); const statBanned = el('#statBanned');
+const pageInfo = el('#pageInfo');
+
+function headers(extra = {}) {
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+token, ...extra };
+}
+
+// Fetch users list
+async function loadUsers() {
+  const skip = state.page * state.limit;
+  const params = new URLSearchParams({
+    skip, limit: state.limit,
+    q: state.filters.q, role: state.filters.role, banned: state.filters.banned
+  });
+  const res = await fetch(`/api/admin/users?${params.toString()}`, { headers: headers() });
+  if (res.status === 403) { alert('Access denied'); return; }
+  const data = await res.json();
+  state.users = data.users || [];
+  state.total = data.total || state.users.length;
+  renderUsers();
+}
+
+// Render users table
+function renderUsers() {
+  tbody.innerHTML = '';
+  state.users.forEach(u => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="checkbox" data-id="${u._id}" class="sel"/></td>
+      <td>
+        <div class="user-row">
+          <div class="avatar">${(u.email||'U').charAt(0).toUpperCase()}</div>
+          <div>
+            <div style="font-weight:700">${u.email || '—'}</div>
+            <div class="meta">${u.phone||''} • ${u._id}</div>
+          </div>
+        </div>
+      </td>
+      <td>${u.role || 'user'}</td>
+      <td>${u.isBanned ? '<span class="pill">Banned</span>':'<span class="pill">Active</span>'}</td>
+      <td class="meta">${new Date(u.createdAt || u.created || Date.now()).toLocaleString()}</td>
+      <td>
+        <button class="btn-ghost viewBtn" data-id="${u._id}">View</button>
+        <button class="btn" data-id="${u._id}" data-action="${u.isBanned? 'unban':'ban'}">${u.isBanned? 'Unban':'Ban'}</button>
+        <button class="danger delBtn" data-id="${u._id}">Delete</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  pageInfo.textContent = `Page ${state.page+1} • ${state.total} total`;
+}
+
+// Select handlers (event delegation)
+tbody.addEventListener('click', async (ev) => {
+  const view = ev.target.closest('.viewBtn');
+  if (view) {
+    const id = view.dataset.id; await selectUser(id); return;
+  }
+  const banBtn = ev.target.closest('button[data-action]');
+  if (banBtn) {
+    const id = banBtn.dataset.id; const action = banBtn.dataset.action;
+    if (!confirm(`${action === 'ban' ? 'Ban' : 'Unban'} this user?`)) return;
+    await toggleBan(id, action === 'ban');
+    await loadUsers();
+    return;
+  }
+  const del = ev.target.closest('.delBtn');
+  if (del) {
+    const id = del.dataset.id;
+    if (!confirm('Delete user and their chats? This cannot be undone.')) return;
+    await deleteUser(id); await loadUsers();
+  }
+});
+
+// UI controls
+el('#refreshBtn').addEventListener('click', async () => {
+  await loadStats(); await loadUsers();
+});
+el('#prevPage').addEventListener('click', () => { if (state.page>0) { state.page--; loadUsers(); }});
+el('#nextPage').addEventListener('click', () => { state.page++; loadUsers(); });
+el('#selectAll').addEventListener('click', () => {
+  document.querySelectorAll('.sel').forEach(cb => cb.checked = true);
+});
+el('#bulkBan').addEventListener('click', bulkAction.bind(null,'ban'));
+el('#bulkUnban').addEventListener('click', bulkAction.bind(null,'unban'));
+el('#bulkDelete').addEventListener('click', bulkAction.bind(null,'delete'));
+
+qInp.addEventListener('input', debounce(() => { state.filters.q = qInp.value.trim(); loadUsers(); }, 450));
+roleFilter.addEventListener('change', () => { state.filters.role = roleFilter.value; loadUsers(); });
+banFilter.addEventListener('change', () => { state.filters.banned = banFilter.value; loadUsers(); });
+
+// detail actions
+el('#editRole').addEventListener('click', async () => {
+  if (!state.selected) return alert('Select user first');
+  const newRole = prompt('Enter role (user/admin):', state.selected.role || 'user');
+  if (!newRole) return;
+  await updateRole(state.selected._id, newRole);
+  await loadUsers(); await selectUser(state.selected._id);
+});
+el('#banToggle').addEventListener('click', async () => {
+  if (!state.selected) return; await toggleBan(state.selected._id, !state.selected.isBanned); await selectUser(state.selected._id); await loadUsers();
+});
+el('#deleteUser').addEventListener('click', async () => {
+  if (!state.selected) return;
+  if (!confirm('Delete selected user?')) return;
+  await deleteUser(state.selected._id); clearDetails(); await loadUsers();
+});
+el('#refreshChats').addEventListener('click', () => { if (state.selected) loadChats(state.selected._id); });
+el('#sendAsAdmin').addEventListener('click', sendAdminMessage);
+el('#exportUsers').addEventListener('click', () => { window.open('/api/admin/export/users', '_blank'); });
+el('#impersonateBtn').addEventListener('click', async () => {
+  if (!state.selected) return alert('Select a user to impersonate');
+  // optional endpoint support; if not supported server should return 404
+  const res = await fetch(`/api/admin/impersonate/${state.selected._id}`, { method: 'POST', headers: headers() });
+  if (res.ok) {
+    const data = await res.json();
+    alert('Impersonation token created. Use with care.');
+    console.log(data);
+  } else {
+    alert('Impersonation not supported by server.');
+  }
+});
+
+// load stats
+async function loadStats() {
+  try {
+    const res = await fetch('/api/admin/stats', { headers: headers() });
+    if (!res.ok) return;
+    const data = await res.json();
+    statUsers.textContent = data.userCount || 0;
+    statChats.textContent = data.chatCount || 0;
+    statBanned.textContent = data.bannedCount || 0;
+  } catch (e) { console.error(e); }
+}
+
+// select user and load details
+async function selectUser(id) {
+  try {
+    const res = await fetch(`/api/admin/users/${id}`, { headers: headers() });
+    if (!res.ok) return;
+    const { user } = await res.json();
+    state.selected = user;
+    renderDetails(user);
+    loadChats(id);
+    loadUserActivity(id);
+    renderEmotionChart([]);
+    document.getElementById('banToggle').style.display = 'inline-block';
+    document.getElementById('deleteUser').style.display = 'inline-block';
+    document.getElementById('banToggle').textContent = user.isBanned ? 'Unban' : 'Ban';
+    document.getElementById('banToggle').className = user.isBanned ? 'btn success' : 'btn danger';
+  } catch (e) { console.error(e); }
+}
+
+function renderDetails(u) {
+  el('#detailName').textContent = u.email || '—';
+  el('#detailMeta').innerHTML = `<div><strong>ID:</strong> ${u._id}</div><div class="meta">Phone: ${u.phone||'—'}</div><div class="meta">Role: ${u.role||'user'}</div>`;
+}
+
+// load user chats
+async function loadChats(userId) {
+  try {
+    const res = await fetch(`/api/admin/chats/${userId}`, { headers: headers() });
+    if (!res.ok) { el('#chatList').textContent = 'Failed to load chats'; return; }
+    const d = await res.json();
+    const messages = d.messages || [];
+    const container = el('#chatList'); container.innerHTML = '';
+    messages.forEach(m => {
+      const block = document.createElement('div');
+      block.style.marginBottom = '8px';
+      block.innerHTML = `<div class="meta">${m.sender || m.role || ''} • ${new Date(m.timestamp || m.createdAt || Date.now()).toLocaleString()}</div>
+        <div style="padding:8px;background:rgba(255,255,255,0.02);border-radius:8px;margin-top:6px">${escapeHtml(m.text || m.message || JSON.stringify(m)).replace(/\n/g,'<br>')}</div>`;
+      container.appendChild(block);
+    });
+    // derive emotion breakdown if messages include emotion flags
+    const byEmotion = {};
+    messages.forEach(m => { if (m.emotion) byEmotion[m.emotion]=(byEmotion[m.emotion]||0)+1; });
+    renderEmotionChart(Object.entries(byEmotion).map(([k,v])=>({label:k,count:v})));
+  } catch (e) { console.error(e); el('#chatList').textContent='Error loading chats'; }
+}
+
+// send message as admin to user (optional server support)
+async function sendAdminMessage() {
+  if (!state.selected) return alert('Select user first');
+  const text = el('#adminMsg').value.trim();
+  if (!text) return alert('Message required');
+  const payload = { text };
+  const res = await fetch(`/api/admin/users/${state.selected._id}/message`, { method: 'POST', headers: headers(), body: JSON.stringify(payload) });
+  if (res.ok) {
+    el('#adminMsg').value = '';
+    alert('Message queued/sent (server-dependent).');
+    loadChats(state.selected._id);
+  } else {
+    alert('Send failed — endpoint may not exist.');
+  }
+}
+
+// toggle ban
+async function toggleBan(id, ban=true) {
+  const res = await fetch(`/api/admin/users/${id}/ban`, { method:'POST', headers: headers(), body: JSON.stringify({ ban }) });
+  if (!res.ok) alert('Failed to update ban status');
+}
+
+// delete user
+async function deleteUser(id) {
+  const res = await fetch(`/api/admin/users/${id}`, { method:'DELETE', headers: headers() });
+  if (!res.ok) alert('Delete failed');
+}
+
+// bulk actions
+async function bulkAction(action) {
+  const ids = Array.from(document.querySelectorAll('.sel:checked')).map(cb=>cb.dataset.id);
+  if (!ids.length) return alert('No users selected');
+  if (!confirm(`Confirm ${action} on ${ids.length} users?`)) return;
+  for (const id of ids) {
+    try {
+      if (action === 'ban') await toggleBan(id,true);
+      if (action === 'unban') await toggleBan(id,false);
+      if (action === 'delete') await deleteUser(id);
+    } catch(e){ console.error(e); }
+  }
+  await loadUsers();
+}
+
+// update role
+async function updateRole(id, role) {
+  const res = await fetch(`/api/admin/users/${id}`, { method: 'PUT', headers: headers(), body: JSON.stringify({ role }) });
+  if (!res.ok) alert('Role update failed');
+}
+
+// load user activity (latest)
+async function loadUserActivity(userId) {
+  const res = await fetch(`/api/admin/chats/${userId}`, { headers: headers() });
+  if (!res.ok) { el('#latestActivity').textContent = '—'; return; }
+  const d = await res.json();
+  const msgs = d.messages || [];
+  el('#latestActivity').textContent = msgs.length ? `${msgs[msgs.length-1].sender||''}: ${truncate(msgs[msgs.length-1].text||msgs[msgs.length-1].message||'')}` : 'No messages';
+}
+
+// utils
+function escapeHtml(s='') { return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+function truncate(s, n=80){ return s.length>n? s.slice(0,n-1)+'…': s; }
+function debounce(fn, ms=200){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+
+// emotion chart
+let emotionChart = null;
+function renderEmotionChart(items) {
+  const labels = items.map(i=>i.label); const data = items.map(i=>i.count);
+  const ctx = document.getElementById('emotionChart').getContext('2d');
+  if (emotionChart) { emotionChart.data.labels = labels; emotionChart.data.datasets[0].data = data; emotionChart.update(); return; }
+  emotionChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#6be2a1','#b39ddb','#a4a4a4'] }] },
+    options: { plugins:{legend:{position:'bottom'}}}
+  });
+}
+
+// initial load
+(async function init(){
+  await loadStats();
+  await loadUsers();
+})();
+</script>
+</body>
+</html>

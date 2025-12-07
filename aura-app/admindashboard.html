@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversational AI Admin Dashboard</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background-color: #111827; /* Dark Gray */
+            background-image: radial-gradient(at center top, #5a2450, #3b1534); /* Purple/Pink Gradient */
+            color: white;
+        }
+
+        /* Utility for rotating loader */
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Custom scrollbar for better visibility */
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 8px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background-color: #6d28d9; /* Purple-700 */
+            border-radius: 4px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: #3730a3; /* Indigo-900 */
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="app" class="min-h-screen p-4 sm:p-8">
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-8">
+            <h1 class="text-4xl font-extrabold text-white">Admin Dashboard</h1>
+            <p class="text-purple-300 mt-1">Conversational AI Platform Control Panel</p>
+        </header>
+
+        <!-- Tab Navigation Container -->
+        <div id="tab-navigation" class="flex space-x-2 border-b border-purple-700 mb-8 overflow-x-auto pb-2">
+            <!-- Tabs injected here by JS -->
+        </div>
+
+        <!-- Main Content Area -->
+        <div id="content-area">
+            <!-- Content injected here by JS -->
+        </div>
+
+        <!-- Footer for Context -->
+        <footer class="mt-12 text-center text-xs text-purple-400">
+            &copy; 2025 Conversational AI. All rights reserved.
+        </footer>
+    </div>
+</div>
+
+<script>
+    // --- ICON SVGS (Lucide Icons converted to strings) ---
+    // Note: These are simplified SVG definitions to keep the file self-contained.
+    const getIconSvg = (name, className) => {
+        const iconMap = {
+            Users: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+            MessageSquare: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+            TrendingUp: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><polyline points="22 7 13.5 15.5 10.5 12.5 5 18"/><polyline points="18 7 22 7 22 11"/></svg>`,
+            Activity: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+            Cpu: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><rect width="16" height="16" x="4" y="4" rx="2"/><path d="M9 9h6v6H9z"/><path d="M12 1v3"/><path d="M12 20v3"/><path d="M20 12h3"/><path d="M1 12h3"/><path d="M18.5 18.5l-2.12-2.12"/><path d="M5.62 5.62l2.12 2.12"/><path d="M18.5 5.5l-2.12 2.12"/><path d="M5.62 18.5l2.12-2.12"/></svg>`,
+            CheckCircle: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M9 11l3 3L22 4"/></svg>`,
+            AlertTriangle: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+            Edit: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>`,
+            Trash2: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M15 2h-6"/><path d="M17 6L16 6 15 4 9 4 8 6 7 6"/></svg>`,
+            Loader2: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`
+        };
+        return iconMap[name] || `<span class="${className}">[${name}]</span>`;
+    };
+
+    // --- MOCK DATA GENERATION ---
+    const generateMockData = (count) => {
+        const statuses = ['Active', 'Idle', 'Banned', 'Pending'];
+        const languages = ['English', 'Swahili', 'Mix'];
+        const data = [];
+        for (let i = 1; i <= count; i++) {
+            data.push({
+                userId: `user-${1000 + i}`,
+                username: `UserAlpha${i}`,
+                email: `user${i}@example.com`,
+                status: statuses[Math.floor(Math.random() * statuses.length)],
+                lastActive: new Date(Date.now() - Math.floor(Math.random() * 86400000 * 30)).toLocaleDateString(),
+                sessions: Math.floor(Math.random() * 150) + 10,
+                language: languages[Math.floor(Math.random() * languages.length)],
+                registrationDate: new Date(Date.now() - Math.floor(Math.random() * 86400000 * 90)).toLocaleDateString(),
+            });
+        }
+        return data;
+    };
+
+    let state = {
+        users: generateMockData(20),
+        kpis: {
+            totalUsers: 20,
+            activeChats: 145,
+            sessionsToday: 987,
+            avgSessionDuration: '12 min 34 sec',
+        },
+        serviceHealth: [
+            { name: 'Database (Mongo)', status: 'Operational', icon: 'CheckCircle', color: 'text-green-400' },
+            { name: 'AI Model API', status: 'Operational', icon: 'CheckCircle', color: 'text-green-400' },
+            { name: 'Email Service', status: 'Degraded', icon: 'AlertTriangle', color: 'text-yellow-400' },
+            { name: 'Cron Jobs (Affirmations)', status: 'Operational', icon: 'CheckCircle', color: 'text-green-400' },
+        ],
+        chartData: [
+            { day: 'Mon', sessions: 200 },
+            { day: 'Tue', sessions: 250 },
+            { day: 'Wed', sessions: 180 },
+            { day: 'Thu', sessions: 300 },
+            { day: 'Fri', sessions: 220 },
+            { day: 'Sat', sessions: 350 },
+            { day: 'Sun', sessions: 280 },
+        ],
+        searchTerm: '',
+        activeTab: 'Overview',
+        tabs: ['Overview', 'Users', 'Billing', 'Logs']
+    };
+
+    // --- STATE MANAGEMENT & RENDERING ---
+
+    const setState = (newState) => {
+        state = { ...state, ...newState };
+        renderApp();
+    };
+
+    // --- UTILITY COMPONENT RENDERS (HTML String generation) ---
+
+    const renderCard = (title, value, iconName, color) => `
+        <div class="bg-purple-900/40 p-5 rounded-xl shadow-lg border border-purple-800/50 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/10">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-purple-300 uppercase">${title}</p>
+                ${getIconSvg(iconName, `w-6 h-6 ${color}`)}
+            </div>
+            <p class="mt-4 text-3xl font-extrabold text-white">${value}</p>
+        </div>
+    `;
+
+    const renderServiceStatusIndicator = ({ name, status, icon, color }) => `
+        <div class="flex justify-between items-center p-3 bg-purple-900/30 rounded-lg">
+            <div class="flex items-center space-x-3">
+                ${getIconSvg(icon, `w-5 h-5 ${color}`)}
+                <span class="text-white">${name}</span>
+            </div>
+            <span class="text-xs font-semibold ${color}">${status}</span>
+        </div>
+    `;
+
+    const renderSimpleBarChart = (data) => {
+        const totalSessions = Math.max(...data.map(d => d.sessions)) * 1.1;
+
+        const bars = data.map((item, index) => `
+            <div class="flex flex-col items-center h-full w-full">
+                <div 
+                    class="w-4 sm:w-8 rounded-t-md bg-pink-500 transition-all duration-500 hover:bg-pink-400 relative group"
+                    style="height: ${Math.max(1, (item.sessions / totalSessions) * 100)}%"
+                >
+                    <!-- Tooltip -->
+                    <span class="absolute bottom-full mb-2 p-1 text-xs text-white bg-purple-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                        ${item.sessions} sessions
+                    </span>
+                </div>
+                <span class="text-xs mt-2 text-purple-300">${item.day}</span>
+            </div>
+        `).join('');
+
+        return `
+            <div class="p-4 bg-purple-900/30 rounded-xl mt-4">
+                <h3 class="text-lg font-semibold mb-4 text-white">Weekly Sessions</h3>
+                <div class="h-48 flex items-end justify-around space-x-2">
+                    ${bars}
+                </div>
+            </div>
+        `;
+    };
+
+    // --- ACTION HANDLERS ---
+
+    const handleUserAction = (userId, action) => {
+        const user = state.users.find(u => u.userId === userId);
+        if (!user) return;
+
+        // Note: In a real app, this would be an AJAX call to the backend.
+        // We use window.alert for a simple notification, as requested in HTML guidelines.
+
+        if (action === 'ban') {
+            let newStatus = user.status === 'Banned' ? 'Active' : 'Banned';
+            window.alert(`${newStatus === 'Banned' ? 'Banning' : 'Unbanning'} ${user.username}... (Simulated API call)`);
+
+            const newUsers = state.users.map(u => 
+                u.userId === userId ? { ...u, status: newStatus } : u
+            );
+            setState({ users: newUsers });
+
+        } else if (action === 'delete') {
+            window.alert(`Deleting user ${user.username}... (Simulated API call)`);
+            const newUsers = state.users.filter(u => u.userId !== userId);
+            setState({ users: newUsers, kpis: { ...state.kpis, totalUsers: newUsers.length } });
+        }
+    };
+
+    const handleSearchChange = (event) => {
+        setState({ searchTerm: event.target.value });
+    };
+
+    // --- TAB RENDERING FUNCTIONS ---
+
+    const renderOverviewTab = () => {
+        const { kpis, serviceHealth, chartData } = state;
+        return `
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                ${renderCard("Total Users", kpis.totalUsers, 'Users', 'text-pink-400')}
+                ${renderCard("Active Chats", kpis.activeChats, 'MessageSquare', 'text-yellow-400')}
+                ${renderCard("Sessions Today", kpis.sessionsToday, 'Activity', 'text-cyan-400')}
+                ${renderCard("Avg. Session Duration", kpis.avgSessionDuration, 'TrendingUp', 'text-green-400')}
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Chat Analytics Panel -->
+                <div class="lg:col-span-2 bg-purple-900/40 p-6 rounded-xl shadow-xl border border-purple-800/50">
+                    <h2 class="text-xl font-bold text-white mb-4">Chat Engagement Analytics</h2>
+                    ${renderSimpleBarChart(chartData)}
+                </div>
+
+                <!-- System Health Panel -->
+                <div class="bg-purple-900/40 p-6 rounded-xl shadow-xl border border-purple-800/50">
+                    <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                        ${getIconSvg('Cpu', 'w-5 h-5 mr-2 text-pink-400')}
+                        Service Health Status
+                    </h2>
+                    <div class="space-y-3">
+                        ${serviceHealth.map(renderServiceStatusIndicator).join('')}
+                    </div>
+                    <p class="text-xs text-purple-300 mt-4">Last checked: ${new Date().toLocaleTimeString()}</p>
+                </div>
+            </div>
+        `;
+    };
+
+    const renderUsersTab = () => {
+        const { users, searchTerm } = state;
+        const filteredUsers = users.filter(user =>
+            user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.userId.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        const tableRows = filteredUsers.map(user => {
+            const statusClass = user.status === 'Active' ? 'bg-green-600/30 text-green-300' :
+                                user.status === 'Banned' ? 'bg-red-600/30 text-red-300' :
+                                user.status === 'Idle' ? 'bg-yellow-600/30 text-yellow-300' :
+                                'bg-purple-600/30 text-purple-300';
+            
+            const banButtonClass = user.status === 'Banned' ? 'text-green-400 hover:bg-green-500/20' : 'text-yellow-400 hover:bg-yellow-500/20';
+            const banTitle = user.status === 'Banned' ? 'Unban User' : 'Ban User';
+
+            return `
+                <tr class="text-sm text-white hover:bg-purple-800/50 transition-colors">
+                    <td class="px-4 py-3 text-purple-300">${user.userId}</td>
+                    <td class="px-4 py-3">
+                        <div class="font-semibold">${user.username}</div>
+                        <div class="text-xs text-purple-400">${user.email}</div>
+                    </td>
+                    <td class="px-4 py-3 hidden sm:table-cell">${user.sessions}</td>
+                    <td class="px-4 py-3 hidden md:table-cell">${user.language}</td>
+                    <td class="px-4 py-3">
+                        <span class="px-3 py-1 text-xs font-medium rounded-full ${statusClass}">
+                            ${user.status}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                        <button 
+                            data-action="ban" data-user-id="${user.userId}"
+                            class="p-2 rounded-full transition-colors mx-1 ${banButtonClass}"
+                            title="${banTitle}"
+                        >
+                            ${getIconSvg('Edit', 'w-4 h-4')}
+                        </button>
+                        <button 
+                            data-action="delete" data-user-id="${user.userId}"
+                            class="p-2 rounded-full text-red-400 hover:bg-red-500/20 transition-colors mx-1"
+                            title="Delete User"
+                        >
+                            ${getIconSvg('Trash2', 'w-4 h-4')}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        return `
+            <div class="bg-purple-900/40 p-6 rounded-xl shadow-xl border border-purple-800/50">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-white mb-4 md:mb-0">User Management (${filteredUsers.length} total)</h2>
+                    <input
+                        type="text"
+                        id="user-search"
+                        placeholder="Search by name, email, or ID..."
+                        class="w-full md:w-80 p-2 rounded-lg bg-purple-800/70 border border-purple-700 text-white placeholder-purple-400 focus:ring-pink-500 focus:border-pink-500"
+                        value="${searchTerm}"
+                        oninput="handleSearchChange(event)"
+                    />
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto">
+                        <thead>
+                            <tr class="text-sm text-purple-300 uppercase bg-purple-800/70">
+                                <th class="px-4 py-3 text-left rounded-tl-lg">User ID</th>
+                                <th class="px-4 py-3 text-left">Name / Email</th>
+                                <th class="px-4 py-3 text-left hidden sm:table-cell">Sessions</th>
+                                <th class="px-4 py-3 text-left hidden md:table-cell">Language</th>
+                                <th class="px-4 py-3 text-left">Status</th>
+                                <th class="px-4 py-3 text-right rounded-tr-lg">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-table-body" data-listeners-attached="true">
+                            ${tableRows.length > 0 ? tableRows : `
+                                <tr>
+                                    <td colspan="6" class="p-8 text-center text-purple-400">No users match your search criteria.</td>
+                                </tr>
+                            `}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    };
+
+    const renderGenericTab = (title, content) => `
+        <div class="p-8 bg-purple-900/40 rounded-xl text-center text-purple-300">
+            <h2 class="text-xl font-bold text-white mb-4">${title}</h2>
+            ${content}
+        </div>
+    `;
+
+    const renderContent = () => {
+        const { activeTab } = state;
+        switch (activeTab) {
+            case 'Overview':
+                return renderOverviewTab();
+            case 'Users':
+                return renderUsersTab();
+            case 'Billing':
+                return renderGenericTab('Billing Management', 'Billing details go here. Monitor subscription statuses and revenue metrics. (Mock Content)');
+            case 'Logs':
+                return renderGenericTab('System Logs', 'System event logs and error traces for debugging. (Mock Content)');
+            default:
+                return '';
+        }
+    };
+
+    const renderTabNavigation = () => {
+        const navContainer = document.getElementById('tab-navigation');
+        navContainer.innerHTML = state.tabs.map(tab => {
+            const isActive = state.activeTab === tab;
+            const buttonClass = isActive
+                ? 'text-pink-400 border-b-2 border-pink-400 bg-purple-900/50'
+                : 'text-purple-300 hover:text-white hover:bg-purple-900/30';
+            
+            return `
+                <button
+                    data-tab="${tab}"
+                    class="py-2 px-4 rounded-t-lg text-sm font-medium transition-colors whitespace-nowrap ${buttonClass}"
+                >
+                    ${tab}
+                </button>
+            `;
+        }).join('');
+    };
+
+    const renderApp = () => {
+        renderTabNavigation();
+        document.getElementById('content-area').innerHTML = renderContent();
+        attachEventListeners();
+    };
+
+    // --- EVENT LISTENERS ---
+
+    const attachEventListeners = () => {
+        const navContainer = document.getElementById('tab-navigation');
+        const contentArea = document.getElementById('content-area');
+
+        // 1. Tab Switching Listener (Event Delegation)
+        navContainer.onclick = (e) => {
+            const button = e.target.closest('button[data-tab]');
+            if (button) {
+                setState({ activeTab: button.getAttribute('data-tab') });
+            }
+        };
+
+        // 2. User Action Listener (Event Delegation on Content Area)
+        contentArea.onclick = (e) => {
+            const button = e.target.closest('button[data-action]');
+            if (button) {
+                const action = button.getAttribute('data-action');
+                const userId = button.getAttribute('data-user-id');
+                if (action && userId) {
+                    handleUserAction(userId, action);
+                }
+            }
+        };
+    };
+
+    // Initialize the application once the window loads
+    window.onload = renderApp;
+
+</script>
+
+</body>
+</html>
