@@ -404,6 +404,10 @@
 <!-- Initialize Lucide icons and Scroll Reveal -->
 <script>
     const API_URL = "https://auramentalhealthh.onrender.com";
+    fetch(`${API_URL}/api/data`)
+    .then(res => res.json())
+    .then(data => console.log(data))
+    .catch(err => console.error(err));
     // Lucide Icons initialization
     lucide.createIcons();
     

@@ -1,4 +1,4 @@
-require('dotenv').config(); // Load .env file at the start
+require('dotenv').config(); 
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
@@ -14,18 +14,34 @@ connectDB();
 
 const app = express();
 
+// 🔑 CORRECTION: Place 'trust proxy' here, immediately after app initialization.
+// This tells Express to recognize proxy headers before any middleware runs.
+app.set('trust proxy', 1);
+
+// Custom Middleware for HTTPS Redirect (Now correctly uses trusted headers)
+app.use((req, res, next) => {
+  // Render's proxy sets 'x-forwarded-proto' to 'http' or 'https'
+  // When 'trust proxy' is set, this check is reliable.
+  if (req.headers['x-forwarded-proto'] !== 'https') {
+    return res.redirect('https://' + req.headers.host + req.url);
+  }
+  next();
+});
+
+
 // Middleware
 app.use(cors({
-    origin: 'http://127.0.0.1:5500', // ⚠️ Replace this with the actual URL/Port of the HTML file, e.g., 'http://127.0.0.1:5500'
+    origin: 'http://127.0.0.1:5500', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true, // Needed if you use cookies or headers across origins
-})); // Allows frontend to make requests
-app.use(express.json()); // Allows parsing of JSON request body
+    credentials: true, 
+})); 
+app.use(express.json()); 
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100 // limit each IP to 100 requests per windowMs
 });
+
 app.use(limiter);
 // Routes
 app.use('/api/auth', authRoutes);
@@ -37,11 +53,11 @@ const PORT = process.env.PORT || 5000;
 
 // Example API route
 app.get('/api/data', (req, res) => {
-  res.json({ message: 'Hello from API!' });
+    res.json({ message: 'Hello from API!' });
 });
 
 app.get('/', (req, res) => {
-  res.send('Server is running!');
+    res.send('Server is running!');
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
