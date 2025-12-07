@@ -35,4 +35,13 @@ app.use('/api/user', userRoutes);
 
 const PORT = process.env.PORT || 5000;
 
+// Example API route
+app.get('/api/data', (req, res) => {
+  res.json({ message: 'Hello from API!' });
+});
+
+app.get('/', (req, res) => {
+  res.send('Server is running!');
+});
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
