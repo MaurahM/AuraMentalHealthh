@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 
 // Middleware
 app.use(cors({
-    origin: 'https://auramentalhealthh-production.up.railway.app', 
+    origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true, 
 })); 
