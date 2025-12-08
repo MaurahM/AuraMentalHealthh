@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
-
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Chat Conversational AI</title>
@@ -52,234 +50,189 @@
     .msg{max-width:86%}
   }
 </style>
-<script src="theme-manager.js"></script>
 </head>
 
 <body>
-      <script>
-    // --- 🔑 AUTHENTICATION GUARD SCRIPT (MUST RUN FIRST) ---
-    const TOKEN_KEY = 'convai_user_token';
-    const token = localStorage.getItem(TOKEN_KEY);
+<script>
+  // --- Authentication Guard ---
+  const TOKEN_KEY = 'convai_user_token';
+  const token = localStorage.getItem(TOKEN_KEY);
 
-    // If the token is missing (meaning the user logged out), redirect immediately.
-    if (!token) {
-        window.location.href = 'index.html';
-    }
-    // --- END GUARD SCRIPT ---
+  if (!token) {
+      window.location.href = 'index.html';
+  }
 </script>
-  
-  <main class="wrap" role="main" aria-labelledby="chatTitle">
-    <section class="panel" aria-labelledby="chatTitle">
-      <div class="header">
-        <div class="title" id="chatTitle">Chat with Aura</div>
-        <div style="font-size:13px;color:var(--muted)">
-          <a href="Dashboard.html" style="color:var(--pink);text-decoration:none">Back</a>
+
+<main class="wrap" role="main" aria-labelledby="chatTitle">
+  <section class="panel" aria-labelledby="chatTitle">
+    <div class="header">
+      <div class="title" id="chatTitle">Chat with Aura</div>
+      <div style="font-size:13px;color:var(--muted)">
+        <a href="Dashboard.html" style="color:var(--pink);text-decoration:none">Back</a>
+      </div>
+    </div>
+
+    <div class="chat-area" role="application" aria-live="polite" aria-atomic="false">
+      <div id="messages" class="messages" role="list" aria-label="Messages">
+        <div class="msg left" role="listitem">
+          <div class="meta">Assistant</div>
+          Hello Love, I'm here to listen. How are you feeling today?
         </div>
       </div>
 
-      <div class="chat-area" role="application" aria-live="polite" aria-atomic="false">
-        <div id="messages" class="messages" role="list" aria-label="Messages">
-          <div class="msg left" role="listitem">
-            <div class="meta">Assistant</div>
-            Hello Love, I'm here to listen. How are you feeling today?
-          </div>
-        </div>
-
-        <div class="composer" role="region" aria-label="Message composer">
-          <button id="clear" class="btn-clear" aria-label="Clear chat" title="Clear Chat">Clear</button>
-          <textarea id="input" class="input" placeholder="Type something..." rows="1" aria-label="Message"></textarea>
-          <button id="send" class="btn" aria-label="Send message" title="Send">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="https://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" fill="#fff"/>
-            </svg>
-          </button>
-        </div>
+      <div class="composer" role="region" aria-label="Message composer">
+        <button id="clear" class="btn-clear" aria-label="Clear chat" title="Clear Chat">Clear</button>
+        <textarea id="input" class="input" placeholder="Type something..." rows="1" aria-label="Message"></textarea>
+        <button id="send" class="btn" aria-label="Send message" title="Send">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" fill="#fff"/>
+          </svg>
+        </button>
       </div>
+    </div>
 
-      <div class="hint">Press Enter to send / Shift+Enter for new line</div>
-      <a class="btn-ghost" href="Escalation.html">Emergency Services</a>
-    </section>
-  </main>
+    <div class="hint">Press Enter to send / Shift+Enter for new line</div>
+    <a class="btn-ghost" href="Escalation.html">Emergency Services</a>
+  </section>
+</main>
 
 <script>
-(function () {
-    const messagesEl = document.getElementById("messages");
-    const inputEl = document.getElementById("input");
-    const sendBtn = document.getElementById("send");
-    const clearBtn = document.getElementById("clear");
+(async function(){
+  const messagesEl = document.getElementById("messages");
+  const inputEl = document.getElementById("input");
+  const sendBtn = document.getElementById("send");
+  const clearBtn = document.getElementById("clear");
+  const BASE_API_URL = "https://auramentalhealthh-production.up.railway.app/api/chat";
 
-    const token = localStorage.getItem('userToken');
-    if (!token) {
-        alert("Session expired or user not logged in. Redirecting.");
-        window.location.href = 'login.html'; 
-        return; 
+  function escapeHtml(s=""){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+  function appendMessage(text, side="right", who=""){
+    const wrap = document.createElement("div");
+    wrap.className = `msg ${side}`;
+    wrap.setAttribute("role","listitem");
+    if(who){
+      const meta = document.createElement("div");
+      meta.className="meta";
+      meta.textContent=who;
+      wrap.appendChild(meta);
     }
+    const textNode = document.createElement("div");
+    textNode.innerHTML = escapeHtml(text).replace(/\n/g,"<br>");
+    wrap.appendChild(textNode);
+    messagesEl.appendChild(wrap);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
 
-    const BASE_API_URL = "https://auramentalhealthh-production.up.railway.app/api/chat"; 
-    const getHeaders = (contentType = 'application/json') => ({
-        'Content-Type': contentType,
-        'Authorization': `Bearer ${token}`
-    });
+  function showTyping(){
+    document.querySelectorAll('.typing').forEach(el=>el.remove());
+    const node = document.createElement("div");
+    node.className="msg left typing";
+    node.setAttribute("role","status");
+    const meta = document.createElement("div");
+    meta.className="meta";
+    meta.textContent="Aura 💗";
+    const dots = document.createElement("div");
+    dots.innerHTML="&#8230;";
+    node.appendChild(meta);
+    node.appendChild(dots);
+    messagesEl.appendChild(node);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return node;
+  }
 
-    function escapeHtml(s = "") {
-        return String(s).replace(/[&<>"']/g, (c) => ({
-            "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-        })[c]);
+  async function loadChatHistory(){
+    try{
+      const res = await fetch(`${BASE_API_URL}/history`, {method:'GET', headers:{'Authorization':`Bearer ${token}`}});
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      messagesEl.innerHTML = "";
+      if(data.messages?.length>0){
+        data.messages.forEach(msg=>{
+          const side = msg.sender==='user'?'right':'left';
+          const who = msg.sender==='user'?'You':'Aura 💗';
+          appendMessage(msg.text, side, who);
+        });
+      } else {
+        appendMessage("Hello! I'm Aura. I'm here to listen and support your mental well-being today.", 'left', 'Aura 💗');
+      }
+    } catch(err){
+      console.error('History load failed:', err);
+      appendMessage(`System Error: Could not load chat history. ${err.message}`, 'left','System');
     }
+  }
 
-    function appendMessage(text, side = "right", who = "") {
-        const wrap = document.createElement("div");
-        wrap.className = `msg ${side}`;
-        wrap.setAttribute("role", "listitem");
-        if (who) {
-            const meta = document.createElement("div");
-            meta.className = "meta";
-            meta.textContent = who;
-            wrap.appendChild(meta);
-        }
-        const textNode = document.createElement("div");
-        textNode.innerHTML = escapeHtml(text).replace(/\n/g, "<br>");
-        wrap.appendChild(textNode);
-        messagesEl.appendChild(wrap);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
+  async function sendMessageToServer(text){
+    const controller = new AbortController();
+    const timeout = setTimeout(()=>controller.abort(),30000);
+    try{
+      const res = await fetch(`${BASE_API_URL}/message`,{
+        method:"POST",
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+        body: JSON.stringify({message:text}),
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+      if(!res.ok){
+        const errBody = await res.json().catch(()=>({message:`HTTP ${res.status}`}));
+        throw new Error(errBody.message||`HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      return data.response || "Sorry, I didn’t quite get that 💭";
+    } catch(err){
+      if(err.name==="AbortError") throw new Error("Request timed out ⏳");
+      throw err;
     }
+  }
 
-    function showTyping() {
-        const node = document.createElement("div");
-        node.className = "msg left typing";
-        node.setAttribute("role", "status");
-        const meta = document.createElement("div");
-        meta.className = "meta";
-        meta.textContent = "Aura 💗";
-        const dots = document.createElement("div");
-        dots.innerHTML = "&#8230;";
-        node.appendChild(meta);
-        node.appendChild(dots);
-        messagesEl.appendChild(node);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-        return node;
+  async function send(){
+    const raw = inputEl.value.trim();
+    if(!raw) return;
+    appendMessage(raw,"right","You");
+    inputEl.value=""; inputEl.style.height="auto"; inputEl.focus();
+    sendBtn.disabled=true; sendBtn.setAttribute("aria-busy","true");
+    const typingNode = showTyping();
+    try{
+      const reply = await sendMessageToServer(raw);
+      typingNode.remove();
+      appendMessage(reply,"left","Aura 💗");
+    } catch(err){
+      typingNode.remove();
+      console.error("Chat failed:",err);
+      appendMessage(`Server error: ${err.message}`,"left","Aura 💗");
+    } finally{
+      sendBtn.disabled=false; sendBtn.removeAttribute("aria-busy");
     }
+  }
 
-    async function loadChatHistory() {
-        try {
-            const res = await fetch(`${BASE_API_URL}/history`, {
-                method: 'GET',
-                headers: getHeaders('text/plain')
-            });
-            if (!res.ok) {
-                const error = await res.json();
-                throw new Error(error.message || `HTTP ${res.status}`);
-            }
-            const data = await res.json();
-            const welcomeMsg = messagesEl.querySelector('.msg.left');
-            if (welcomeMsg) welcomeMsg.remove(); 
-            if (data.messages.length > 0) {
-                data.messages.forEach(msg => {
-                    const side = msg.sender === 'user' ? 'right' : 'left';
-                    const who = msg.sender === 'user' ? 'You' : 'Aura 💗';
-                    appendMessage(msg.text, side, who); 
-                });
-            } else {
-                appendMessage("Hello! I'm Aura. I'm here to listen and support your mental well-being today.", 'left', 'Aura 💗');
-            }
-        } catch (err) {
-            console.error('Failed to load history:', err);
-            appendMessage(`System Error: Could not load chat history. ${err.message}`, 'left', 'System');
-        }
+  clearBtn.addEventListener("click",async()=>{
+    if(!confirm("Are you sure you want to clear all chats?")) return;
+    try{
+      const res = await fetch(`${BASE_API_URL}/history`,{method:"DELETE",headers:{'Authorization':`Bearer ${token}`}});
+      if(!res.ok){
+        const errBody = await res.json().catch(()=>({message:`HTTP ${res.status}`}));
+        throw new Error(errBody.message||`HTTP ${res.status}`);
+      }
+      messagesEl.innerHTML="";
+      appendMessage("Hello! I'm Aura. I'm here to listen and support your mental well-being today.", "left", "Aura 💗");
+    } catch(err){
+      console.error("Failed to clear chat:",err);
+      appendMessage(`Could not clear chat: ${err.message}`,"left","System");
     }
+  });
 
-    async function sendMessageToServer(text) {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 30000);
-        try {
-            const res = await fetch(`${BASE_API_URL}/message`, {
-                method: "POST",
-                headers: getHeaders(),
-                body: JSON.stringify({ message: text }),
-                signal: controller.signal,
-            });
-            clearTimeout(timeout);
-            if (!res.ok) {
-                const errBody = await res.json();
-                throw new Error(errBody.message || `HTTP ${res.status}`);
-            }
-            const data = await res.json();
-            return data.response || "Sorry, I didn’t quite get that 💭"; 
-        } catch (err) {
-            if (err.name === "AbortError") throw new Error("Request timed out ⏳");
-            throw err;
-        }
-    }
+  inputEl.addEventListener("keydown",(e)=>{
+    if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); send(); }
+  });
 
-    async function send() {
-        const raw = inputEl.value.trim();
-        if (!raw) return;
-        appendMessage(raw, "right", "You");
-        inputEl.value = "";
-        inputEl.style.height = "auto";
-        inputEl.focus();
-        sendBtn.disabled = true;
-        sendBtn.setAttribute("aria-busy", "true");
-        const typingNode = showTyping();
-        try {
-            const reply = await sendMessageToServer(raw);
-            typingNode.remove();
-            appendMessage(reply, "left", "Aura 💗");
-        } catch (err) {
-            typingNode.remove();
-            console.error("Chat failed:", err);
-            appendMessage(`Server error: ${err.message}`, "left", "Aura 💗");
-        } finally {
-            sendBtn.disabled = false;
-            sendBtn.removeAttribute("aria-busy");
-        }
-    }
+  sendBtn.addEventListener("click", send);
 
-    // --- Clear Chat Handler (Safe JSON fallback) ---
-    clearBtn.addEventListener("click", async () => {
-        if (!confirm("Are you sure you want to clear all chats?")) return;
-        try {
-            const res = await fetch(`${BASE_API_URL}/history`, {
-                method: "DELETE",
-                headers: getHeaders()
-            });
+  inputEl.addEventListener("input",()=>{
+    inputEl.style.height="auto";
+    inputEl.style.height=Math.min(inputEl.scrollHeight,140)+"px";
+  });
 
-            if (!res.ok) {
-                let errorMsg = `HTTP ${res.status}`;
-                try {
-                    const errBody = await res.json(); 
-                    errorMsg = errBody.message || errorMsg;
-                } catch (_) {
-                    const errText = await res.text();
-                    errorMsg = errText || errorMsg;
-                }
-                throw new Error(errorMsg);
-            }
-
-            messagesEl.innerHTML = "";
-            appendMessage("Hello! I'm Aura. I'm here to listen and support your mental well-being today.", "left", "Aura 💗");
-        } catch (err) {
-            console.error("Failed to clear chat:", err);
-            appendMessage(`Could not clear chat: ${err.message}`, "left", "System");
-        }
-    });
-
-    inputEl.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            send();
-        }
-    });
-
-    sendBtn.addEventListener("click", send);
-
-    inputEl.addEventListener("input", () => {
-        inputEl.style.height = "auto";
-        inputEl.style.height = Math.min(inputEl.scrollHeight, 140) + "px";
-    });
-
-    inputEl.focus();
-    loadChatHistory();
+  inputEl.focus();
+  loadChatHistory();
 })();
 </script>
 
