@@ -57,15 +57,21 @@
 
 <body>
       <script>
-    // --- 🔑 AUTHENTICATION GUARD SCRIPT (MUST RUN FIRST) ---
-    const TOKEN_KEY = 'convai_user_token';
-    const token = localStorage.getItem(TOKEN_KEY);
+    // --- 🔑 AUTHENTICATION GUARD ---
+const TOKEN_KEY = 'convai_user_token';
+const token = localStorage.getItem(TOKEN_KEY);
 
-    // If the token is missing (meaning the user logged out), redirect immediately.
-    if (!token) {
-        window.location.href = 'index.html';
-    }
-    // --- END GUARD SCRIPT ---
+if (!token) {
+    window.location.href = 'index.html';
+}
+
+const BASE_API_URL = "https://auramentalhealthh-production.up.railway.app/api/chat"; 
+
+const getHeaders = (contentType = 'application/json') => ({
+    'Content-Type': contentType,
+    'Authorization': `Bearer ${token}`
+});
+
 </script>
   
   <main class="wrap" role="main" aria-labelledby="chatTitle">
@@ -108,7 +114,7 @@
     const sendBtn = document.getElementById("send");
     const clearBtn = document.getElementById("clear");
 
-    const token = localStorage.getItem('userToken');
+    const token = localStorage.getItem('convai_user_token');
     if (!token) {
         alert("Session expired or user not logged in. Redirecting.");
         window.location.href = 'login.html'; 
