@@ -200,7 +200,8 @@ form.addEventListener('submit', async (e) => {
   submitBtn.textContent = 'Verifying...';
 
   try {
-    const res = await fetch('https://auramentalhealthh-production.up.railway.app/api/auth/login', {
+    // <-- Here is the updated fetch call
+    const res = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
