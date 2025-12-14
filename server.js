@@ -1,74 +1,63 @@
-// server.js
-
-require('dotenv').config();
+require('dotenv').config(); 
 const express = require('express');
 const cors = require('cors');
-const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/db');
-
-// Import route files
+const rateLimit = require('express-rate-limit');
+// Import Route files
 const authRoutes = require('./Routes/authRoutes');
 const chatRoutes = require('./Routes/chatRoutes');
 const journalRoutes = require('./Routes/journalRoutes');
 const userRoutes = require('./Routes/userRoutes');
 
-// Connect to MongoDB
+// Connect to Database
 connectDB();
 
 const app = express();
 
-// ----- TRUST PROXY -----
-// Needed for correct HTTPS redirection behind proxies (e.g., Heroku, Vercel)
+// 🔑 CORRECTION: Place 'trust proxy' here, immediately after app initialization.
+// This tells Express to recognize proxy headers before any middleware runs.
 app.set('trust proxy', 1);
 
-// ----- HTTPS REDIRECT -----
-// Only redirect if not HTTPS
+// Custom Middleware for HTTPS Redirect (Now correctly uses trusted headers)
 app.use((req, res, next) => {
-    if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] !== 'https') {
-        return res.redirect('https://' + req.headers.host + req.url);
-    }
-    next();
+  // Render's proxy sets 'x-forwarded-proto' to 'http' or 'https'
+  // When 'trust proxy' is set, this check is reliable.
+  if (req.headers['x-forwarded-proto'] !== 'https') {
+    return res.redirect('https://' + req.headers.host + req.url);
+  }
+  next();
 });
 
-// ----- CORS -----
+
+// Middleware
 app.use(cors({
-    origin: '*', // Or specify your frontend URL for security
+    origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-}));
+    credentials: true, 
+})); 
+app.use(express.json()); 
 
-// ----- BODY PARSER -----
-app.use(express.json());
-
-// ----- RATE LIMITING -----
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
-    message: 'Too many requests from this IP, please try again later.'
+    max: 100 // limit each IP to 100 requests per windowMs
 });
-app.use(limiter);
 
-// ----- ROUTES -----
+app.use(limiter);
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/journal', journalRoutes);
 app.use('/api/user', userRoutes);
 
-// ----- HEALTH CHECK / BASE ROUTES -----
-app.get('/', (req, res) => {
-    res.send('Server is running!');
-});
+const PORT = process.env.PORT || 5000;
 
+// Example API route
 app.get('/api/data', (req, res) => {
     res.json({ message: 'Hello from API!' });
 });
 
-// ----- ERROR HANDLING -----
-// Catch all unmatched routes
-app.use((req, res) => {
-    res.status(404).json({ message: 'Route not found' });
+app.get('/', (req, res) => {
+    res.send('Server is running!');
 });
 
-// ----- START SERVER -----
-const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
