@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 // Sub-schema for individual messages
 const MessageSchema = new Schema({
     sender: {
-        type: String, // 'user' or 'ai'
+        type: String, // 'user' or 'model'
         required: true
     },
     text: {
@@ -18,14 +18,13 @@ const MessageSchema = new Schema({
 });
 
 const ChatSchema = new Schema({
-    // Links the chat session to a specific user
     user: {
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true,
-        unique: true // Ensure only one Chat document per user
+        unique: true
     },
-    messages: [MessageSchema] // Array of messages
+    messages: [MessageSchema]
 });
 
 module.exports = mongoose.model('Chat', ChatSchema);

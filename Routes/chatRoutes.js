@@ -1,22 +1,34 @@
-// Routes/chatRoutes.js
+// routes/chatRoutes.js
 
 const express = require('express');
 const router = express.Router();
-// Use lowercase 'middleware' for best practice, unless your folder is capitalized
-const { protect } = require('../Middleware/authMiddleware'); 
 
-// Import the entire controller object
+// Import your authentication middleware
+// 'protect' ensures that only logged-in users can access the chat routes
+const { protect } = require('../middleware/authMiddleware'); 
+
+// Import all chat controller functions
 const chatController = require('../controllers/chatController'); 
 
-// @route POST /api/chat/message
-// Access functions via the imported object
+/**
+ * @route   POST /api/chat/message
+ * @desc    Send a message to Aura and receive AI response
+ * @access  Private (requires authentication)
+ */
 router.post('/message', protect, chatController.sendMessage);
 
-// @route GET /api/chat/history
-// Access functions via the imported object
+/**
+ * @route   GET /api/chat/history
+ * @desc    Get full chat history for the logged-in user
+ * @access  Private
+ */
 router.get('/history', protect, chatController.getHistory);
 
-// @route DELETE /api/chat/history
+/**
+ * @route   DELETE /api/chat/history
+ * @desc    Clear chat history for the logged-in user
+ * @access  Private
+ */
 router.delete('/history', protect, chatController.clearHistory);
 
 module.exports = router;
