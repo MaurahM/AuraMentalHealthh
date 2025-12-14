@@ -155,7 +155,11 @@
                 <span class="text-sm font-semibold text-muted/70">Availability 24/7/365</span>
             </div>
             <div class="section-card p-6 rounded-xl text-left hover:scale-[1.03]">
+<<<<<<< HEAD
                 <strong class="text-4xl block mb-2 font-extrabold" style="color:var(--color-success)">300 KES/pm</strong>
+=======
+                <strong class="text-4xl block mb-2 font-extrabold" style="color:var(--color-success)">300 KES/p.m</strong>
+>>>>>>> ee98a6d6a0666883feac6ed173d7a36fb0422753
                 <span class="text-sm font-semibold text-muted/70">Affordable , No Hidden Costs</span>
             </div>
         </div>
@@ -421,7 +425,7 @@ fetch(`${API_URL}/api/data`)
                 // When intersecting, remove the hidden class and add the animation class
                 entry.target.classList.remove('section-hidden');
                 entry.target.classList.add('animate-in');
-                observer.unobserve(entry.target); // Stop observing once it's visible
+                observer.unobserve(entry.target); // Stop observing once it's visible 
             }
         });
     }, { 
