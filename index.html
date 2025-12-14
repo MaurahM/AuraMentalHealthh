@@ -421,7 +421,7 @@ fetch(`${API_URL}/api/data`)
                 // When intersecting, remove the hidden class and add the animation class
                 entry.target.classList.remove('section-hidden');
                 entry.target.classList.add('animate-in');
-                observer.unobserve(entry.target); // Stop observing once it's visible
+                observer.unobserve(entry.target); // Stop observing once it's visible 
             }
         });
     }, { 
