@@ -6,255 +6,322 @@
     <title>Aura Premium | Unlock Infinity</title>
     
     <script src="https://unpkg.com/intasend-inlinejs-sdk@4.0.7/build/intasend-inline.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --accent: #ff2fa6;
             --secondary: #8e2de2;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.12);
+            --bg: #050205;
+            --card-bg: rgba(20, 10, 20, 0.6);
+            --border: rgba(255, 255, 255, 0.08);
         }
 
         body {
             margin: 0;
-            padding: 0;
-            background: #0f050f;
+            background-color: var(--bg);
+            color: white;
             font-family: 'Plus Jakarta Sans', sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             overflow: hidden;
-            color: white;
         }
 
-        /* Animated Background Orbs */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
+        /* Ambient Mesh Gradient Background */
+        .mesh-gradient {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            animation: move 25s infinite alternate;
-        }
-        .orb-1 { width: 500px; height: 500px; background: var(--accent); top: -10%; left: -10%; opacity: 0.15; }
-        .orb-2 { width: 400px; height: 400px; background: var(--secondary); bottom: -10%; right: -10%; opacity: 0.15; animation-delay: -5s; }
-
-        @keyframes move {
-            from { transform: translate(0, 0) scale(1); }
-            to { transform: translate(100px, 100px) scale(1.1); }
+            background: 
+                radial-gradient(at 0% 0%, rgba(255, 47, 166, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(142, 45, 226, 0.15) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(255, 47, 166, 0.05) 0px, transparent 80%);
         }
 
-        /* Glass Card */
-        .card {
-            background: var(--glass);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid var(--border);
-            border-radius: 40px;
-            padding: 50px 40px;
-            width: 400px;
-            text-align: center;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
-            position: relative;
-        }
-
-        .card::before {
-            content: '';
+        /* Floating Aurora Orbs */
+        .aurora {
             position: absolute;
-            inset: 0;
-            border-radius: 40px;
-            padding: 1px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent, rgba(255,255,255,0.1));
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask-composite: exclude;
-            pointer-events: none;
+            width: 600px; height: 600px;
+            background: var(--accent);
+            filter: blur(120px);
+            opacity: 0.1;
+            border-radius: 50%;
+            animation: drift 20s infinite alternate;
         }
 
-        .top-badge {
-            background: rgba(255, 47, 166, 0.1);
-            border: 1px solid rgba(255, 47, 166, 0.3);
-            color: var(--accent);
-            padding: 6px 16px;
+        @keyframes drift {
+            from { transform: translate(-20%, -20%) rotate(0deg); }
+            to { transform: translate(20%, 20%) rotate(360deg); }
+        }
+
+        /* Main Container */
+        .premium-container {
+            width: 90%;
+            max-width: 480px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 40px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            text-align: center;
+        }
+
+        /* Pricing Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 100px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            display: inline-block;
-            margin-bottom: 25px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: var(--accent);
+            margin-bottom: 24px;
         }
 
-        h1 { font-size: 36px; margin: 0; font-weight: 800; letter-spacing: -1px; }
-        .price { font-size: 60px; font-weight: 900; margin: 20px 0; display: flex; align-items: baseline; justify-content: center; gap: 8px; }
-        .price span { font-size: 16px; color: #888; font-weight: 400; }
-
-        .features {
-            text-align: left;
-            margin: 35px 0;
-            list-style: none;
-            padding: 0;
+        h1 {
+            font-size: 38px;
+            font-weight: 800;
+            margin: 0 0 10px;
+            background: linear-gradient(to bottom, #fff, #999);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .features li {
-            margin-bottom: 15px;
+        .price-tag {
+            font-size: 54px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            letter-spacing: -2px;
+        }
+
+        .price-tag span {
+            font-size: 18px;
+            font-weight: 400;
+            color: #666;
+            letter-spacing: 0;
+        }
+
+        /* Feature List - Bento Style */
+        .feature-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 15px;
-            color: #ccc;
+            gap: 15px;
+            text-align: left;
+            transition: 0.3s ease;
         }
 
-        .features li svg { color: var(--accent); }
-
-        /* Modern Input */
-        .input-box {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 18px;
-            margin-bottom: 25px;
-            transition: 0.3s;
-        }
-
-        .input-box:focus-within {
+        .feature-item:hover {
+            background: rgba(255, 255, 255, 0.06);
             border-color: var(--accent);
-            background: rgba(0,0,0,0.6);
         }
 
-        .input-box label {
+        .feature-icon {
+            width: 32px; height: 32px;
+            background: rgba(255, 47, 166, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+        }
+
+        /* Input Experience */
+        .input-group {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .input-group label {
             display: block;
             text-align: left;
-            font-size: 10px;
-            color: #666;
-            margin-bottom: 5px;
-            font-weight: 700;
-            text-transform: uppercase;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+            font-weight: 600;
+            padding-left: 4px;
         }
 
-        input {
+        .input-field {
             width: 100%;
-            background: transparent;
-            border: none;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 18px;
+            box-sizing: border-box;
             color: white;
             font-size: 18px;
             font-weight: 600;
+            transition: 0.3s;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .input-field:focus {
             outline: none;
+            border-color: var(--accent);
+            background: rgba(0,0,0,0.5);
+            box-shadow: 0 0 20px rgba(255, 47, 166, 0.1);
         }
 
         /* The Ultimate Button */
         #pay-btn {
             width: 100%;
-            background: linear-gradient(135deg, var(--accent), var(--secondary));
-            color: white;
+            background: #fff;
+            color: #000;
             border: none;
-            padding: 22px;
-            border-radius: 24px;
+            padding: 20px;
+            border-radius: 20px;
             font-size: 18px;
             font-weight: 800;
             cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(255, 47, 166, 0.3);
-            transition: 0.4s;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         #pay-btn:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 25px 50px rgba(255, 47, 166, 0.5);
+            transform: scale(1.02);
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 20px 40px rgba(255, 47, 166, 0.3);
         }
 
-        /* Shimmer Effect */
-        #pay-btn::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
-            transform: rotate(45deg);
-            animation: shimmer 3s infinite;
+        #pay-btn:disabled {
+            background: #222;
+            color: #555;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        @keyframes shimmer {
-            0% { left: -100%; }
-            100% { left: 100%; }
+        .secure-footer {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
-
-        #pay-btn:disabled { filter: grayscale(1); cursor: not-allowed; transform: none; }
-
-        .footer { font-size: 11px; color: #555; margin-top: 25px; }
     </style>
 </head>
 <body>
 
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
+    <div class="mesh-gradient"></div>
+    <div class="aurora"></div>
 
-    <div class="card">
-        <div class="top-badge">AURA PLUS</div>
-        <h1>Elevate Your Mind</h1>
-        <div class="price">300<span>/ KES monthly</span></div>
+    <div class="premium-container">
+        <div class="card">
+            <div class="badge">✦ AURA INFINITY</div>
+            <h1>Unlock Everything.</h1>
+            <div class="price-tag">300<span>/mo</span></div>
 
-        <ul class="features">
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Unlimited Deep AI Conversations</li>
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Weekly Mental Health Reports</li>
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Premium Meditation Sounds</li>
-        </ul>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">✨</div>
+                    <div>
+                        <div style="font-weight: 600; font-size: 14px;">Deep Conversations</div>
+                        <div style="font-size: 12px; color: #777;">Unlimited access to Aura AI</div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <div>
+                        <div style="font-weight: 600; font-size: 14px;">Weekly Insights</div>
+                        <div style="font-size: 12px; color: #777;">Advanced mental health reports</div>
+                    </div>
+                </div>
+            </div>
 
-        <div class="input-box">
-            <label>M-Pesa Number (Recipient or Sponsor)</label>
-            <input type="tel" id="phone" placeholder="0712 345 678" maxlength="15">
+            <div class="input-group">
+                <label>M-PESA NUMBER</label>
+                <input type="tel" id="phone" class="input-field" placeholder="07XX XXX XXX" maxlength="15">
+            </div>
+
+            <button id="pay-btn">
+                <span>Activate Now</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+
+            <div class="secure-footer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C9.243 2 7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5zm-3 5c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9V7z"/></svg>
+                Secure M-Pesa Checkout
+            </div>
         </div>
-
-        <button id="pay-btn">Activate Premium ✨</button>
-
-        <p class="footer">🔒 Secure 256-bit encrypted M-Pesa Payment</p>
     </div>
 
     <script>
         const intasend = new window.IntaSend({
-            publicAPIKey: "ISPubKey_test_your_key", // REPLACE THIS
-            live: false 
+            publicAPIKey: "ISPubKey_live_d0d3e243-2fad-4268-bd05-4320a8fc7b6d", // 🔴 Replace with your ACTUAL test key
+            live: true 
         });
 
         const payBtn = document.getElementById('pay-btn');
         const phoneInput = document.getElementById('phone');
 
-        // Automatic Formatting (07xx -> 2547xx)
         phoneInput.addEventListener('input', (e) => {
             let val = e.target.value.replace(/\D/g, '');
             if (val.startsWith('0')) val = '254' + val.slice(1);
+            if (val.length > 0 && !val.startsWith('254')) {
+                if (val.startsWith('7') || val.startsWith('1')) val = '254' + val;
+            }
             e.target.value = val;
         });
 
         payBtn.addEventListener('click', () => {
-            const phone = phoneInput.value;
+            const phone = phoneInput.value.trim();
             
-            if (phone.length < 12) {
-                alert("Please enter a valid M-Pesa number! 🌸");
+            if (!/^254(7|1)\d{8}$/.test(phone)) {
+                alert("Please enter a valid M-Pesa number 🌸");
                 return;
             }
 
             payBtn.disabled = true;
-            payBtn.textContent = "Check your phone... 📱";
+            payBtn.innerHTML = `<span>Processing...</span>`;
 
             intasend.run({
                 amount: 300,
                 currency: "KES",
                 phone_number: phone,
                 email: localStorage.getItem('user_email') || "user@aura.app",
-                method: "M-PESA"
+                api_ref: "premium_sub",
+                method: "M-PESA",
+                channel: "M-PESA" 
             })
-            .on("COMPLETE", () => {
+            .on("COMPLETE", (results) => {
+                localStorage.setItem('justPaid', 'true');
                 window.location.href = "Dashboard.html";
             })
-            .on("FAILED", () => {
+            .on("FAILED", (results) => {
                 payBtn.disabled = false;
-                payBtn.textContent = "Activate Premium ✨";
-                alert("Payment was not successful. Try again? 💔");
+                payBtn.innerHTML = `<span>Activate Now</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
+                alert("Payment Failed: " + (results.error || "Please try again."));
             })
             .on("IN-PROGRESS", () => {
-                console.log("STK Push sent to Safaricom");
+                payBtn.innerHTML = `<span>Check Phone 📱</span>`;
             });
         });
     </script>
