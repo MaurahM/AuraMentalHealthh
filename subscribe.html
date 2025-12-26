@@ -1,277 +1,262 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Unlock Aura Plus</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Premium | Unlock Infinity</title>
+    
+    <script src="https://unpkg.com/intasend-inlinejs-sdk@4.0.7/build/intasend-inline.js"></script>
 
-  <!-- IntaSend Inline SDK -->
-  <script src="https://unpkg.com/intasend-inlinejs-sdk@4.0.7/build/intasend-inline.js"></script>
+    <style>
+        :root {
+            --accent: #ff2fa6;
+            --secondary: #8e2de2;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.12);
+        }
 
-  <style>
-    :root {
-      --primary: #ff2fa6;
-      --secondary: #8e2de2;
-      --glass: rgba(255, 255, 255, 0.08);
-      --text: #ffffff;
-    }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0f050f;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            color: white;
+        }
 
-    * {
-      box-sizing: border-box;
-    }
+        /* Animated Background Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            animation: move 25s infinite alternate;
+        }
+        .orb-1 { width: 500px; height: 500px; background: var(--accent); top: -10%; left: -10%; opacity: 0.15; }
+        .orb-2 { width: 400px; height: 400px; background: var(--secondary); bottom: -10%; right: -10%; opacity: 0.15; animation-delay: -5s; }
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: #120512;
-      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text);
-      overflow: hidden;
-    }
+        @keyframes move {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(100px, 100px) scale(1.1); }
+        }
 
-    /* Background */
-    .aura-bg {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at center, #2b0b26 0%, #120512 100%);
-      z-index: -1;
-    }
+        /* Glass Card */
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 50px 40px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+            position: relative;
+        }
 
-    .bubble {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(90px);
-      opacity: 0.25;
-      animation: float 20s infinite alternate;
-    }
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 40px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent, rgba(255,255,255,0.1));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            pointer-events: none;
+        }
 
-    .bubble.one {
-      width: 400px;
-      height: 400px;
-      background: var(--primary);
-      top: -120px;
-      left: -120px;
-    }
+        .top-badge {
+            background: rgba(255, 47, 166, 0.1);
+            border: 1px solid rgba(255, 47, 166, 0.3);
+            color: var(--accent);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 25px;
+        }
 
-    .bubble.two {
-      width: 320px;
-      height: 320px;
-      background: var(--secondary);
-      bottom: -80px;
-      right: -80px;
-    }
+        h1 { font-size: 36px; margin: 0; font-weight: 800; letter-spacing: -1px; }
+        .price { font-size: 60px; font-weight: 900; margin: 20px 0; display: flex; align-items: baseline; justify-content: center; gap: 8px; }
+        .price span { font-size: 16px; color: #888; font-weight: 400; }
 
-    @keyframes float {
-      from {
-        transform: translate(0, 0);
-      }
-      to {
-        transform: translate(120px, 160px);
-      }
-    }
+        .features {
+            text-align: left;
+            margin: 35px 0;
+            list-style: none;
+            padding: 0;
+        }
 
-    /* Card */
-    .premium-card {
-      width: 380px;
-      padding: 48px 38px;
-      border-radius: 38px;
-      background: var(--glass);
-      backdrop-filter: blur(22px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 25px 55px rgba(0, 0, 0, 0.45);
-      text-align: center;
-    }
+        .features li {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            color: #ccc;
+        }
 
-    .badge {
-      display: inline-block;
-      padding: 8px 18px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      background: rgba(255, 47, 166, 0.2);
-      color: var(--primary);
-      margin-bottom: 14px;
-    }
+        .features li svg { color: var(--accent); }
 
-    h1 {
-      margin: 0;
-      font-size: 2.2rem;
-      font-weight: 800;
-    }
+        /* Modern Input */
+        .input-box {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 25px;
+            transition: 0.3s;
+        }
 
-    .price {
-      margin: 18px 0;
-      font-size: 3rem;
-      font-weight: 800;
-      background: linear-gradient(#fff, var(--primary));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+        .input-box:focus-within {
+            border-color: var(--accent);
+            background: rgba(0,0,0,0.6);
+        }
 
-    .price span {
-      font-size: 1rem;
-      color: #aaa;
-      -webkit-text-fill-color: #aaa;
-    }
+        .input-box label {
+            display: block;
+            text-align: left;
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
 
-    .feature-list {
-      list-style: none;
-      padding: 0;
-      margin: 30px 0;
-      text-align: left;
-    }
+        input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            outline: none;
+        }
 
-    .feature-list li {
-      margin: 12px 0;
-      font-size: 15px;
-      color: #ddd;
-      display: flex;
-      gap: 12px;
-    }
+        /* The Ultimate Button */
+        #pay-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            color: white;
+            border: none;
+            padding: 22px;
+            border-radius: 24px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(255, 47, 166, 0.3);
+            transition: 0.4s;
+        }
 
-    .input-group {
-      text-align: left;
-      margin-bottom: 20px;
-    }
+        #pay-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 25px 50px rgba(255, 47, 166, 0.5);
+        }
 
-    label {
-      font-size: 12px;
-      color: #aaa;
-      margin-left: 12px;
-    }
+        /* Shimmer Effect */
+        #pay-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
 
-    input {
-      width: 100%;
-      margin-top: 6px;
-      padding: 14px 18px;
-      border-radius: 15px;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: white;
-      font-size: 16px;
-      outline: none;
-    }
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
 
-    input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 12px rgba(255, 47, 166, 0.3);
-    }
+        #pay-btn:disabled { filter: grayscale(1); cursor: not-allowed; transform: none; }
 
-    button {
-      width: 100%;
-      padding: 18px;
-      border-radius: 22px;
-      border: none;
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: 700;
-      color: white;
-      background: linear-gradient(45deg, var(--primary), var(--secondary));
-      box-shadow: 0 12px 24px rgba(255, 47, 166, 0.35);
-      transition: 0.3s ease;
-    }
-
-    button:hover:not(:disabled) {
-      transform: translateY(-3px);
-      box-shadow: 0 18px 34px rgba(255, 47, 166, 0.5);
-    }
-
-    button:disabled {
-      background: #444;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .footer-note {
-      margin-top: 18px;
-      font-size: 11px;
-      color: #666;
-    }
-  </style>
+        .footer { font-size: 11px; color: #555; margin-top: 25px; }
+    </style>
 </head>
-
 <body>
-  <div class="aura-bg">
-    <div class="bubble one"></div>
-    <div class="bubble two"></div>
-  </div>
 
-  <div class="premium-card">
-    <div class="badge">LIMITED OFFER</div>
-    <h1>Aura Plus</h1>
-    <div class="price">300<span> / month</span></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
 
-    <ul class="feature-list">
-      <li>✨ <strong>Unlimited</strong> AI therapy sessions</li>
-      <li>☁️ <strong>Secure</strong> cloud-synced journaling</li>
-      <li>🎧 <strong>Premium</strong> meditation library</li>
-      <li>🚀 <strong>Zero</strong> ads, forever</li>
-    </ul>
+    <div class="card">
+        <div class="top-badge">AURA PLUS</div>
+        <h1>Elevate Your Mind</h1>
+        <div class="price">300<span>/ KES monthly</span></div>
 
-    <div class="input-group">
-      <label>M-PESA NUMBER</label>
-      <input
-        id="phone"
-        type="tel"
-        placeholder="2547XXXXXXXX"
-        maxlength="12"
-      />
+        <ul class="features">
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Unlimited Deep AI Conversations</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Weekly Mental Health Reports</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Premium Meditation Sounds</li>
+        </ul>
+
+        <div class="input-box">
+            <label>M-Pesa Number (Recipient or Sponsor)</label>
+            <input type="tel" id="phone" placeholder="0712 345 678" maxlength="15">
+        </div>
+
+        <button id="pay-btn">Activate Premium ✨</button>
+
+        <p class="footer">🔒 Secure 256-bit encrypted M-Pesa Payment</p>
     </div>
 
-    <button id="payBtn">Unlock My Aura ✨</button>
-
-    <p class="footer-note">
-      Secure payments by IntaSend · STK push will appear on your phone
-    </p>
-  </div>
-
-  <script>
-    const intasend = new IntaSend({
-      publicAPIKey: "ISPubKey_test_xxxx", // 🔴 replace with real key
-      live: false
-    });
-
-    const payBtn = document.getElementById("payBtn");
-    const phoneInput = document.getElementById("phone");
-
-    payBtn.addEventListener("click", () => {
-      const phone = phoneInput.value.trim();
-
-      if (!/^2547\d{8}$/.test(phone)) {
-        alert("Enter phone number as 2547XXXXXXXX 📱");
-        return;
-      }
-
-      payBtn.disabled = true;
-      payBtn.textContent = "Sending STK push... 📲";
-
-      intasend
-        .run({
-          amount: 300,
-          currency: "KES",
-          phone_number: phone,
-          email: localStorage.getItem("user_email") || "user@aura.app",
-          first_name: "Aura",
-          last_name: "User",
-          channel: "M-PESA",
-          api_ref: "aura_plus_" + Date.now()
-        })
-        .on("IN-PROGRESS", () => {
-          console.log("STK sent");
-        })
-        .on("COMPLETE", () => {
-          window.location.href = "Dashboard.html";
-        })
-        .on("FAILED", () => {
-          alert("Payment failed. Try again 💔");
-          payBtn.disabled = false;
-          payBtn.textContent = "Unlock My Aura ✨";
+    <script>
+        const intasend = new window.IntaSend({
+            publicAPIKey: "ISPubKey_test_your_key", // REPLACE THIS
+            live: false 
         });
-    });
-  </script>
+
+        const payBtn = document.getElementById('pay-btn');
+        const phoneInput = document.getElementById('phone');
+
+        // Automatic Formatting (07xx -> 2547xx)
+        phoneInput.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\D/g, '');
+            if (val.startsWith('0')) val = '254' + val.slice(1);
+            e.target.value = val;
+        });
+
+        payBtn.addEventListener('click', () => {
+            const phone = phoneInput.value;
+            
+            if (phone.length < 12) {
+                alert("Please enter a valid M-Pesa number! 🌸");
+                return;
+            }
+
+            payBtn.disabled = true;
+            payBtn.textContent = "Check your phone... 📱";
+
+            intasend.run({
+                amount: 300,
+                currency: "KES",
+                phone_number: phone,
+                email: localStorage.getItem('user_email') || "user@aura.app",
+                method: "M-PESA"
+            })
+            .on("COMPLETE", () => {
+                window.location.href = "Dashboard.html";
+            })
+            .on("FAILED", () => {
+                payBtn.disabled = false;
+                payBtn.textContent = "Activate Premium ✨";
+                alert("Payment was not successful. Try again? 💔");
+            })
+            .on("IN-PROGRESS", () => {
+                console.log("STK Push sent to Safaricom");
+            });
+        });
+    </script>
 </body>
 </html>
