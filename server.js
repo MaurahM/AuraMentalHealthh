@@ -31,7 +31,7 @@ app.use(limiter);
  * 🇰🇪 INTASEND WEBHOOK
  * Dashbord URL: https://your-app.com/api/intasend-webhook
  */
-app.post('/api/intasend-webhook', async (req, res) => {
+app.post('https://auramentalhealthh-production.up.railway.app/api/intasend-webhook/api/intasend-webhook', async (req, res) => {
     try {
         const payload = req.body;
         const { state, email, invoice_id, challenge } = payload;
