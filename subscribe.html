@@ -274,56 +274,67 @@
     </div>
 
     <script>
-        const intasend = new window.IntaSend({
-            publicAPIKey: "ISPubKey_live_d0d3e243-2fad-4268-bd05-4320a8fc7b6d", // 🔴 Replace with your ACTUAL test key
-            live: true 
-        });
+    // 1. Initialize the SDK
+    const intasend = new window.IntaSend({
+        publicAPIKey: "ISPubKey_live_d0d3e243-2fad-4268-bd05-4320a8fc7b6d",
+        live: true 
+    });
 
-        const payBtn = document.getElementById('pay-btn');
-        const phoneInput = document.getElementById('phone');
+    const payBtn = document.getElementById('pay-btn');
+    const phoneInput = document.getElementById('phone');
 
-        phoneInput.addEventListener('input', (e) => {
-            let val = e.target.value.replace(/\D/g, '');
-            if (val.startsWith('0')) val = '254' + val.slice(1);
-            if (val.length > 0 && !val.startsWith('254')) {
-                if (val.startsWith('7') || val.startsWith('1')) val = '254' + val;
-            }
-            e.target.value = val;
-        });
+    // Phone formatting logic
+    phoneInput.addEventListener('input', (e) => {
+        let val = e.target.value.replace(/\D/g, '');
+        if (val.startsWith('0')) val = '254' + val.slice(1);
+        if (val.length > 0 && !val.startsWith('254')) {
+            if (val.startsWith('7') || val.startsWith('1')) val = '254' + val;
+        }
+        e.target.value = val;
+    });
 
-        payBtn.addEventListener('click', () => {
-            const phone = phoneInput.value.trim();
+    payBtn.addEventListener('click', () => {
+        const phone = phoneInput.value.trim();
+        
+        if (!/^254(7|1)\d{8}$/.test(phone)) {
+            alert("Please enter a valid M-Pesa number (e.g., 0712...) 🌸");
+            return;
+        }
+
+        payBtn.disabled = true;
+        payBtn.innerHTML = `<span>Connecting...</span>`;
+
+        // 2. The Run Command (FORCING LIVE MODE HERE)
+        intasend.run({
+            amount: 300,
+            currency: "KES",
+            phone_number: phone,
+            email: localStorage.getItem('user_email') || "customer@aura.app",
+            api_ref: "premium_sub",
+            // CRITICAL: Force the method and ensure no sandbox redirect
+            method: "M-PESA",
+            channel: "M-PESA" 
+        })
+        .on("COMPLETE", (results) => {
+            console.log("Payment Success", results);
+            localStorage.setItem('justPaid', 'true');
+            window.location.href = "Dashboard.html";
+        })
+        .on("FAILED", (results) => {
+            console.error("Payment Failed", results);
+            payBtn.disabled = false;
+            payBtn.innerHTML = `<span>Activate Now</span>`;
             
-            if (!/^254(7|1)\d{8}$/.test(phone)) {
-                alert("Please enter a valid M-Pesa number 🌸");
-                return;
-            }
-
-            payBtn.disabled = true;
-            payBtn.innerHTML = `<span>Processing...</span>`;
-
-            intasend.run({
-                amount: 300,
-                currency: "KES",
-                phone_number: phone,
-                email: localStorage.getItem('user_email') || "user@aura.app",
-                api_ref: "premium_sub",
-                method: "M-PESA",
-                channel: "M-PESA" 
-            })
-            .on("COMPLETE", (results) => {
-                localStorage.setItem('justPaid', 'true');
-                window.location.href = "Dashboard.html";
-            })
-            .on("FAILED", (results) => {
-                payBtn.disabled = false;
-                payBtn.innerHTML = `<span>Activate Now</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
-                alert("Payment Failed: " + (results.error || "Please try again."));
-            })
-            .on("IN-PROGRESS", () => {
-                payBtn.innerHTML = `<span>Check Phone 📱</span>`;
-            });
+            // Helpful alerts for common Live errors
+            let msg = results.error || "Check your M-Pesa balance or signal.";
+            if (msg.includes("500")) msg = "Server error. Please try again in a moment.";
+            alert("M-Pesa Notice: " + msg);
+        })
+        .on("IN-PROGRESS", () => {
+            payBtn.innerHTML = `<span>Check Phone 📱</span>`;
+            console.log("STK Push sent to:", phone);
         });
-    </script>
+    });
+</script>
 </body>
 </html>
