@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Successful!</title>
+    <style>
+        body { background: #3b1534; color: white; font-family: sans-serif; text-align: center; padding-top: 100px; }
+        .checkmark { font-size: 80px; color: #8aff80; }
+        .btn { background: #ff2fa6; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; display: inline-block; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="checkmark">✔</div>
+    <h1>Payment Successful!</h1>
+    <p>Your Aura Premium features are now unlocked.</p>
+    <a href="Dashboard.html" class="btn">Go to Dashboard</a>
+
+    <script>
+        // Safety check: ensure status is updated
+        localStorage.setItem('aura_paid_status', 'true');
+        
+        // Auto-redirect after 3 seconds
+        setTimeout(() => {
+            window.location.href = 'Dashboard.html';
+        }, 3000);
+    </script>
+</body>
+</html>

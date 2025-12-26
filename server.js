@@ -3,61 +3,81 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const rateLimit = require('express-rate-limit');
-// Import Route files
+const User = require('./models/User');
+
 const authRoutes = require('./Routes/authRoutes');
 const chatRoutes = require('./Routes/chatRoutes');
 const journalRoutes = require('./Routes/journalRoutes');
 const userRoutes = require('./Routes/userRoutes');
 
-// Connect to Database
 connectDB();
-
 const app = express();
 
-// 🔑 CORRECTION: Place 'trust proxy' here, immediately after app initialization.
-// This tells Express to recognize proxy headers before any middleware runs.
+// 🔑 Security/Proxy settings
 app.set('trust proxy', 1);
 
-// Custom Middleware for HTTPS Redirect (Now correctly uses trusted headers)
-app.use((req, res, next) => {
-  // Render's proxy sets 'x-forwarded-proto' to 'http' or 'https'
-  // When 'trust proxy' is set, this check is reliable.
-  if (req.headers['x-forwarded-proto'] !== 'https') {
-    return res.redirect('https://' + req.headers.host + req.url);
-  }
-  next();
-});
-
-
 // Middleware
-app.use(cors({
-    origin: '*', 
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true, 
-})); 
+app.use(cors({ origin: '*', credentials: true })); 
 app.use(express.json()); 
 
+// Rate Limiter to prevent abuse
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
+    windowMs: 15 * 60 * 1000, 
+    max: 100 
+});
+app.use(limiter);
+
+/**
+ * 🇰🇪 INTASEND WEBHOOK
+ * Dashbord URL: https://your-app.com/api/intasend-webhook
+ */
+app.post('/api/intasend-webhook', async (req, res) => {
+    try {
+        const payload = req.body;
+        const { state, email, invoice_id, challenge } = payload;
+        // Add this inside your server.js webhook route
+        const secret = process.env.INTASEND_SECRET_KEY;
+// Intasend sends a signature you can check to be 100% sure the money is real.
+        // 1. IntaSend periodic security check (Challenge)
+        if (challenge) {
+            console.log("IntaSend Challenge Received");
+            return res.status(200).json({ challenge: challenge });
+        }
+
+        console.log(`📡 Webhook Update: ${state} for ${email}`);
+
+        // 2. If payment is COMPLETE, unlock the user
+        if (state === 'COMPLETE') {
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + 30); // 30 Day Subscription
+
+            await User.findOneAndUpdate(
+                { email: email },
+                { 
+                    isPaid: true, 
+                    subscriptionDate: new Date(),
+                    subscriptionExpiry: expiryDate,
+                    intasend_invoice_id: invoice_id 
+                }
+            );
+            
+            console.log(`✅ ${email} is now Premium until ${expiryDate.toDateString()}`);
+        }
+
+        res.status(200).send('Webhook Received');
+    } catch (error) {
+        console.error("Webhook Error:", error);
+        res.status(500).send('Internal Error');
+    }
 });
 
-app.use(limiter);
-// Routes
+// Standard Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/journal', journalRoutes);
 app.use('/api/user', userRoutes);
 
+app.get('/', (req, res) => res.send('Aura API - IntaSend Ready 🚀'));
+
 const PORT = process.env.PORT || 5000;
-
-// Example API route
-app.get('/api/data', (req, res) => {
-    res.json({ message: 'Hello from API!' });
-});
-
-app.get('/', (req, res) => {
-    res.send('Server is running!');
-});
-
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server on port ${PORT}`));

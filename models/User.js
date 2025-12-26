@@ -18,9 +18,29 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    
-    
-}); 
-
+    // --- SUBSCRIPTION FIELDS ---
+    isPaid: { 
+        type: Boolean, 
+        default: false 
+    },
+    subscriptionDate: { 
+        type: Date 
+    },
+    subscriptionExpiry: { 
+        type: Date 
+    },
+    // We store the IntaSend Invoice ID to track M-Pesa payments
+    intasend_invoice_id: { 
+        type: String,
+        default: null
+    },
+    // Useful for STK Push troubleshooting
+    phoneNumber: {
+        type: String,
+        default: null
+    }
+}, { 
+    timestamps: true 
+});
 
 module.exports = mongoose.model('User', UserSchema);
