@@ -216,7 +216,7 @@ form.addEventListener('submit', async (e) => {
     }
 
     // Successful login
-    localStorage.setItem('convai_user_token', data.token);
+    localStorage.setItem('userToken', data.token);
     // Redirect to dashboard (assuming successful login)
     window.location.href = 'Dashboard.html';
   } catch (err) {
