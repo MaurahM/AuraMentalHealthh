@@ -20,11 +20,12 @@ const MessageSchema = new Schema({
 const ChatSchema = new Schema({
     // Links the chat session to a specific user
     user: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
-        unique: true // Ensure only one Chat document per user
-    },
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    unique: true,
+    index: true // Add this for faster lookups
+},
     messages: [MessageSchema] // Array of messages
 });
 
