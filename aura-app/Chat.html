@@ -108,16 +108,20 @@
     const sendBtn = document.getElementById("send");
     const clearBtn = document.getElementById("clear");
 
-    const token = localStorage.getItem('userToken');
+    // FIX: Use the same key used in your login/guard script
+    const TOKEN_KEY = 'convai_user_token'; 
+    const token = localStorage.getItem(TOKEN_KEY);
+
     if (!token) {
-        alert("Session expired or user not logged in. Redirecting.");
-        window.location.href = 'login.html'; 
+        alert("Session expired or user not logged in.");
+        window.location.href = 'index.html'; 
         return; 
     }
 
     const BASE_API_URL = "https://auramentalhealthh-production.up.railway.app/api/chat"; 
-    const getHeaders = (contentType = 'application/json') => ({
-        'Content-Type': contentType,
+    
+    const getHeaders = () => ({
+        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
     });
 
@@ -130,7 +134,6 @@
     function appendMessage(text, side = "right", who = "") {
         const wrap = document.createElement("div");
         wrap.className = `msg ${side}`;
-        wrap.setAttribute("role", "listitem");
         if (who) {
             const meta = document.createElement("div");
             meta.className = "meta";
@@ -147,12 +150,11 @@
     function showTyping() {
         const node = document.createElement("div");
         node.className = "msg left typing";
-        node.setAttribute("role", "status");
         const meta = document.createElement("div");
         meta.className = "meta";
         meta.textContent = "Aura 💗";
         const dots = document.createElement("div");
-        dots.innerHTML = "&#8230;";
+        dots.innerHTML = "Thinking...";
         node.appendChild(meta);
         node.appendChild(dots);
         messagesEl.appendChild(node);
@@ -164,106 +166,62 @@
         try {
             const res = await fetch(`${BASE_API_URL}/history`, {
                 method: 'GET',
-                headers: getHeaders('text/plain')
+                headers: getHeaders()
             });
-            if (!res.ok) {
-                const error = await res.json();
-                throw new Error(error.message || `HTTP ${res.status}`);
-            }
-            const data = await res.json();
-            const welcomeMsg = messagesEl.querySelector('.msg.left');
-            if (welcomeMsg) welcomeMsg.remove(); 
-            if (data.messages.length > 0) {
-                data.messages.forEach(msg => {
-                    const side = msg.sender === 'user' ? 'right' : 'left';
-                    const who = msg.sender === 'user' ? 'You' : 'Aura 💗';
-                    appendMessage(msg.text, side, who); 
-                });
-            } else {
-                appendMessage("Hello! I'm Aura. I'm here to listen and support your mental well-being today.", 'left', 'Aura 💗');
+            if (res.ok) {
+                const data = await res.json();
+                if (data.messages && data.messages.length > 0) {
+                    messagesEl.innerHTML = ""; // Clear the "Hello" placeholder
+                    data.messages.forEach(msg => {
+                        const side = msg.sender === 'user' ? 'right' : 'left';
+                        const who = msg.sender === 'user' ? 'You' : 'Aura 💗';
+                        appendMessage(msg.text, side, who); 
+                    });
+                }
             }
         } catch (err) {
-            console.error('Failed to load history:', err);
-            appendMessage(`System Error: Could not load chat history. ${err.message}`, 'left', 'System');
-        }
-    }
-
-    async function sendMessageToServer(text) {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 30000);
-        try {
-            const res = await fetch(`${BASE_API_URL}/message`, {
-                method: "POST",
-                headers: getHeaders(),
-                body: JSON.stringify({ message: text }),
-                signal: controller.signal,
-            });
-            clearTimeout(timeout);
-            if (!res.ok) {
-                const errBody = await res.json();
-                throw new Error(errBody.message || `HTTP ${res.status}`);
-            }
-            const data = await res.json();
-            return data.response || "Sorry, I didn’t quite get that 💭"; 
-        } catch (err) {
-            if (err.name === "AbortError") throw new Error("Request timed out ⏳");
-            throw err;
+            console.error('History load failed:', err);
         }
     }
 
     async function send() {
         const raw = inputEl.value.trim();
-        if (!raw) return;
+        if (!raw || sendBtn.disabled) return;
+
         appendMessage(raw, "right", "You");
         inputEl.value = "";
         inputEl.style.height = "auto";
-        inputEl.focus();
+        
         sendBtn.disabled = true;
-        sendBtn.setAttribute("aria-busy", "true");
         const typingNode = showTyping();
+
         try {
-            const reply = await sendMessageToServer(raw);
+            const res = await fetch(`${BASE_API_URL}/message`, {
+                method: "POST",
+                headers: getHeaders(),
+                body: JSON.stringify({ message: raw }),
+            });
+
+            const data = await res.json();
             typingNode.remove();
-            appendMessage(reply, "left", "Aura 💗");
+
+            if (res.ok) {
+                appendMessage(data.response, "left", "Aura 💗");
+            } else {
+                appendMessage(`Error: ${data.message || "Something went wrong"}`, "left", "Aura 💗");
+            }
         } catch (err) {
-            typingNode.remove();
-            console.error("Chat failed:", err);
-            appendMessage(`Server error: ${err.message}`, "left", "Aura 💗");
+            if (typingNode) typingNode.remove();
+            appendMessage("Check your internet connection and try again.", "left", "Aura 💗");
         } finally {
             sendBtn.disabled = false;
-            sendBtn.removeAttribute("aria-busy");
+            inputEl.focus();
         }
     }
 
-    // --- Clear Chat Handler (Safe JSON fallback) ---
-    clearBtn.addEventListener("click", async () => {
-        if (!confirm("Are you sure you want to clear all chats?")) return;
-        try {
-            const res = await fetch(`${BASE_API_URL}/history`, {
-                method: "DELETE",
-                headers: getHeaders()
-            });
-
-            if (!res.ok) {
-                let errorMsg = `HTTP ${res.status}`;
-                try {
-                    const errBody = await res.json(); 
-                    errorMsg = errBody.message || errorMsg;
-                } catch (_) {
-                    const errText = await res.text();
-                    errorMsg = errText || errorMsg;
-                }
-                throw new Error(errorMsg);
-            }
-
-            messagesEl.innerHTML = "";
-            appendMessage("Hello! I'm Aura. I'm here to listen and support your mental well-being today.", "left", "Aura 💗");
-        } catch (err) {
-            console.error("Failed to clear chat:", err);
-            appendMessage(`Could not clear chat: ${err.message}`, "left", "System");
-        }
-    });
-
+    // Event Listeners
+    sendBtn.addEventListener("click", send);
+    
     inputEl.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -271,14 +229,20 @@
         }
     });
 
-    sendBtn.addEventListener("click", send);
-
-    inputEl.addEventListener("input", () => {
-        inputEl.style.height = "auto";
-        inputEl.style.height = Math.min(inputEl.scrollHeight, 140) + "px";
+    clearBtn.addEventListener("click", async () => {
+        if (!confirm("Clear your conversation with Aura?")) return;
+        try {
+            await fetch(`${BASE_API_URL}/clear`, { // Updated to match standard DELETE route
+                method: "DELETE",
+                headers: getHeaders()
+            });
+            messagesEl.innerHTML = "";
+            appendMessage("Hello! I'm Aura. I'm here to listen.", "left", "Aura 💗");
+        } catch (err) {
+            console.error(err);
+        }
     });
 
-    inputEl.focus();
     loadChatHistory();
 })();
 </script>
