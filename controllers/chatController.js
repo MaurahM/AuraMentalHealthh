@@ -227,7 +227,8 @@ exports.sendMessage = async (req, res) => {
 
         // 4. Initialize Model
         // Using "gemini-pro" for maximum stability across versions
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); 
+// OR use "gemini-1.5-pro" if you prefer, but flash is faster/cheaper
 
         // 5. Start Chat Session
         // We inject the system instruction here to ensure Aura follows her rules
