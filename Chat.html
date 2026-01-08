@@ -1,67 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Aura — Your Well-being Companion</title>
-    <style>
-        :root {
-            --bg: #3b1534;
-            --panel: #5a2450;
-            --muted: #d9c9dc;
-            --pink: #ff2fa6;
-            --bubble-left: #e6e0e7;
-            --bubble-right: linear-gradient(90deg, #d94aa0, #ff5aa8);
-            --white: #ffffff;
-        }
-        html, body { height: 100%; margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--white); overflow: hidden; }
-        .wrap { height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .panel { width: 100%; max-width: 900px; height: 90vh; background: rgba(255, 255, 255, 0.05); border-radius: 16px; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
-        .header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .title { font-weight: 700; font-size: 1.2rem; }
-        .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .msg { max-width: 80%; padding: 12px 16px; border-radius: 18px; line-height: 1.4; word-wrap: break-word; position: relative; }
-        .left { align-self: flex-start; background: var(--bubble-left); color: #333; border-bottom-left-radius: 4px; }
-        .right { align-self: flex-end; background: var(--bubble-right); color: #fff; border-bottom-right-radius: 4px; }
-        .meta { font-size: 10px; text-transform: uppercase; margin-bottom: 4px; opacity: 0.7; font-weight: bold; }
-        .composer { padding: 20px; display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.2); }
-        .input { flex: 1; background: rgba(255,255,255,0.1); border: none; border-radius: 25px; padding: 12px 20px; color: white; outline: none; resize: none; font-size: 1rem; }
-        .btn { background: var(--pink); border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-clear { background: transparent; color: var(--muted); border: 1px solid var(--muted); padding: 5px 15px; border-radius: 15px; cursor: pointer; font-size: 0.8rem; }
-        .typing { font-style: italic; font-size: 0.9rem; color: var(--muted); }
-        a.emergency { color: #ffadad; text-decoration: none; font-size: 0.8rem; text-align: center; display: block; padding-bottom: 10px; }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chat Conversational AI</title>
+  <style>
+    :root{
+      --bg:#3b1534;
+      --panel:#5a2450;
+      --muted:#d9c9dc;
+      --pink:#ff2fa6;
+      --bubble-left:#e6e0e7;
+      --bubble-right:linear-gradient(90deg,#d94aa0,#ff5aa8);
+      --white:#ffffff;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;background:var(--bg);color:var(--white)}
+    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:28px;box-sizing:border-box}
+    .panel{width:100%;max-width:1000px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));border-radius:8px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,0.5);display:flex;flex-direction:column;gap:12px;box-sizing:border-box}
+    .header{display:flex;align-items:center;justify-content:space-between}
+    .title{font-weight:700;letter-spacing:0.6px}
+    .chat-area{background:transparent;border-radius:8px;flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:360px}
+    .messages{flex:1;overflow:auto;padding:22px 18px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
+    .msg{max-width:72%;padding:12px 16px;border-radius:20px;box-sizing:border-box;line-height:1.2;word-wrap:break-word}
+    .left{align-self:flex-start;background:var(--bubble-left);color:#333;border-bottom-left-radius:6px}
+    .right{align-self:flex-end;background:var(--bubble-right);color:#fff;border-bottom-right-radius:6px}
+    .meta{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .composer{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(255,255,255,0.03);align-items:center;justify-content:space-between}
+    .input{flex:1;background:rgba(0,0,0,0.15);border-radius:999px;padding:12px 14px;border:0;color:var(--white);outline:none;resize:none;min-height:44px;max-height:120px;margin:0 8px;}
+    .btn{background:linear-gradient(90deg,var(--pink),#ff5aa8);border:0;color:#fff;padding:10px 12px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+    .btn-clear{ background: rgba(255,255,255,0.1); color: var(--pink); border: 1px solid var(--pink); padding: 10px 12px; border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 500;}
+    .hint{font-size:13px;color:var(--muted);text-align:center;margin-top:6px}
+    .btn-ghost{color: #ffadad; text-decoration: none; font-size: 14px; text-align: center; display: block; margin-top: 10px;}
+  </style>
 </head>
+
 <body>
-
-<main class="wrap">
+  <script>
+    // --- 🔑 AUTHENTICATION GUARD ---
+    const TOKEN_KEY = 'convai_user_token'; // MUST match your Login.js key
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) { window.location.href = 'index.html'; }
+  </script>
+  
+  <main class="wrap">
     <section class="panel">
-        <div class="header">
-            <div class="title">Aura 💗</div>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <button id="clear" class="btn-clear">Clear Chat</button>
-                <a href="Dashboard.html" style="color:var(--pink); text-decoration:none; font-weight:bold;">Exit</a>
-            </div>
-        </div>
+      <div class="header">
+        <div class="title">Chat with Aura</div>
+        <div><a href="Dashboard.html" style="color:var(--pink);text-decoration:none">Back</a></div>
+      </div>
 
+      <div class="chat-area">
         <div id="messages" class="messages">
-            <div class="msg left">
-                <div class="meta">Aura</div>
-                Loading our conversation...
-            </div>
-        </div>
-
-        <a href="Escalation.html" class="emergency">Need emergency help? Click here.</a>
+          </div>
 
         <div class="composer">
-            <textarea id="input" class="input" placeholder="Message Aura..." rows="1"></textarea>
-            <button id="send" class="btn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            </button>
+          <button id="clear" class="btn-clear">Clear</button>
+          <textarea id="input" class="input" placeholder="Type something..." rows="1"></textarea>
+          <button id="send" class="btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" fill="#fff"/>
+            </svg>
+          </button>
         </div>
+      </div>
+
+      <div class="hint">Press Enter to send / Shift+Enter for new line</div>
+      <a class="btn-ghost" href="Escalation.html">Emergency Services</a>
     </section>
-</main>
+  </main>
 
 <script>
 (function () {
@@ -70,18 +76,11 @@
     const sendBtn = document.getElementById("send");
     const clearBtn = document.getElementById("clear");
 
-    // --- 🔑 AUTHENTICATION CONFIG ---
-    // Ensure this key matches exactly what you used in login.html
-    const TOKEN_KEY = 'convai_user_token'; 
+    const TOKEN_KEY = 'convai_user_token';
     const token = localStorage.getItem(TOKEN_KEY);
 
-    if (!token) {
-        window.location.href = 'index.html';
-        return;
-    }
-
-    const BASE_API_URL = "https://auramentalhealthh-production.up.railway.app/api/chat";
-
+    const BASE_API_URL = "https://auramentalhealthh-production.up.railway.app/api/chat"; 
+    
     const getHeaders = () => ({
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -90,52 +89,41 @@
     function appendMessage(text, side = "right", who = "") {
         const wrap = document.createElement("div");
         wrap.className = `msg ${side}`;
-        
         if (who) {
             const meta = document.createElement("div");
             meta.className = "meta";
             meta.textContent = who;
             wrap.appendChild(meta);
         }
-
         const textNode = document.createElement("div");
-        textNode.style.whiteSpace = "pre-wrap";
-        textNode.textContent = text;
+        textNode.innerText = text; // Use innerText for safety
         wrap.appendChild(textNode);
-        
         messagesEl.appendChild(wrap);
         messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    // --- 📥 LOAD HISTORY FROM DATABASE ---
     async function loadChatHistory() {
         try {
             const res = await fetch(`${BASE_API_URL}/history`, {
                 method: 'GET',
                 headers: getHeaders()
             });
-
             if (res.ok) {
                 const data = await res.json();
-                messagesEl.innerHTML = ""; // Clear loader
-
+                messagesEl.innerHTML = ""; // FIX: Clear existing view before loading history
                 if (data.messages && data.messages.length > 0) {
                     data.messages.forEach(msg => {
-                        appendMessage(msg.text, msg.sender === 'user' ? 'right' : 'left', msg.sender === 'user' ? 'You' : 'Aura');
+                        appendMessage(msg.text, msg.sender === 'user' ? 'right' : 'left', msg.sender === 'user' ? 'You' : 'Aura 💗');
                     });
                 } else {
-                    appendMessage("Hello Love, I'm Aura. How are you feeling today?", "left", "Aura");
+                    appendMessage("Hello Love, I'm Aura. I'm here to listen.", "left", "Aura 💗");
                 }
-            } else {
-                throw new Error("Could not load history");
             }
         } catch (err) {
-            messagesEl.innerHTML = "";
-            appendMessage("I'm here to listen. (History unavailable)", "left", "Aura");
+            console.error('History Error:', err);
         }
     }
 
-    // --- 📤 SEND MESSAGE ---
     async function send() {
         const message = inputEl.value.trim();
         if (!message || sendBtn.disabled) return;
@@ -145,64 +133,40 @@
         inputEl.style.height = "auto";
         sendBtn.disabled = true;
 
-        const typingDiv = document.createElement("div");
-        typingDiv.className = "msg left typing";
-        typingDiv.textContent = "Aura is typing...";
-        messagesEl.appendChild(typingDiv);
-
         try {
             const res = await fetch(`${BASE_API_URL}/message`, {
                 method: "POST",
                 headers: getHeaders(),
                 body: JSON.stringify({ message })
             });
-
             const data = await res.json();
-            typingDiv.remove();
-
             if (res.ok) {
-                appendMessage(data.response, "left", "Aura");
+                appendMessage(data.response, "left", "Aura 💗");
             } else {
-                appendMessage("I'm having a little trouble connecting. Could you try again?", "left", "Aura");
+                appendMessage("I'm having a little trouble connecting. Please try again.", "left", "Aura 💗");
             }
         } catch (err) {
-            typingDiv.remove();
-            appendMessage("Connection lost. Please check your internet.", "left", "Aura");
+            appendMessage("Connection error. Check your internet.", "left", "Aura 💗");
         } finally {
             sendBtn.disabled = false;
+            inputEl.focus();
         }
     }
 
-    // --- 🗑️ CLEAR CHAT ---
     clearBtn.addEventListener("click", async () => {
-        if (!confirm("Clear our conversation?")) return;
+        if (!confirm("Clear chat?")) return;
         try {
-            await fetch(`${BASE_API_URL}/clear`, {
-                method: "DELETE",
-                headers: getHeaders()
-            });
+            await fetch(`${BASE_API_URL}/clear`, { method: "DELETE", headers: getHeaders() });
             messagesEl.innerHTML = "";
-            appendMessage("Start a new conversation. I'm listening.", "left", "Aura");
-        } catch (err) {
-            alert("Error clearing chat.");
-        }
+            appendMessage("I'm listening. How are you feeling now?", "left", "Aura 💗");
+        } catch (err) { console.error(err); }
     });
 
-    // Listeners
-    sendBtn.addEventListener("click", send);
     inputEl.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            send();
-        }
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
     });
 
-    // Auto-resize input
-    inputEl.addEventListener("input", () => {
-        inputEl.style.height = "auto";
-        inputEl.style.height = (inputEl.scrollHeight) + "px";
-    });
-
+    sendBtn.addEventListener("click", send);
     loadChatHistory();
 })();
 </script>
