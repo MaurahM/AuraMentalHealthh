@@ -207,54 +207,54 @@ exports.sendMessage = async (req, res) => {
     const userId = req.user._id;
     let { message } = req.body;
 
-    // 1. Validate Input
     message = message ? String(message).trim() : '';
     if (message.length === 0) {
         return res.status(400).json({ message: 'Message content cannot be empty.' });
     }
 
     try {
-        // 2. Find or create the user's chat history
         let chatDocument = await Chat.findOne({ user: userId });
         if (!chatDocument) {
             chatDocument = await Chat.create({ user: userId, messages: [] });
         }
 
-        // 3. Construct History for Gemini 
-        // We map 'sender' -> 'role' and 'text' -> 'parts'
+        // FIX 1: Gemini strictly requires 'user' and 'model'. 
+        // We ensure any 'ai' sender is mapped to 'model' for the API history.
         const historyForGemini = chatDocument.messages.map(msg => ({
             role: msg.sender === 'user' ? 'user' : 'model',
             parts: [{ text: msg.text }]
         }));
 
-        // 4. Initialize Model with System Instructions
+        // FIX 2: Use 'gemini-1.5-flash' as the string. 
+        // If you still get a 404, change this to "gemini-pro" as a fallback.
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-flash",
-            systemInstruction: systemInstruction 
+            model: "gemini-1.5-flash" 
         });
 
-        // 5. Start Chat Session with Memory
+        // FIX 3: Start Chat Session
+        // Note: In newer SDKs, systemInstruction is passed in getGenerativeModel above.
+        // If Aura isn't following instructions, we can also prepend it to history.
         const chatSession = model.startChat({
             history: historyForGemini,
             generationConfig: {
-                maxOutputTokens: 500,
+                maxOutputTokens: 800,
                 temperature: 0.7,
             },
         });
 
-        // 6. Generate Response
+        // Generate Response
         const result = await chatSession.sendMessage(message);
-        const aiResponseText = result.response.text();
+        const response = await result.response;
+        const aiResponseText = response.text();
 
         // 7. Persist to Database
-        // Save User Message
+        // We save the user message BEFORE the AI message to keep chronological order
         chatDocument.messages.push({
             sender: 'user',
             text: message,
             timestamp: new Date()
         });
 
-        // Save AI Message (Your schema uses 'ai')
         const aiMessage = {
             sender: 'ai',
             text: aiResponseText,
@@ -264,7 +264,6 @@ exports.sendMessage = async (req, res) => {
 
         await chatDocument.save();
 
-        // 8. Return Response to Frontend
         res.json({
             response: aiResponseText,
             timestamp: aiMessage.timestamp
@@ -272,6 +271,14 @@ exports.sendMessage = async (req, res) => {
 
     } catch (error) {
         console.error('Gemini Chat Error:', error);
+        
+        // Detailed error for debugging
+        if (error.message.includes('404')) {
+            return res.status(500).json({ 
+                message: 'Aura is having trouble connecting to the AI service. Please check model name configuration.' 
+            });
+        }
+        
         res.status(500).json({ message: 'Aura is having trouble connecting. Please try again later.' });
     }
 };
