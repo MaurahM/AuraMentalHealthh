@@ -206,49 +206,68 @@ exports.sendMessage = async (req, res) => {
     const userId = req.user._id;
     let { message } = req.body;
 
+    message = message ? String(message).trim() : '';
+    if (message.length === 0) {
+        return res.status(400).json({ message: 'Message content cannot be empty.' });
+    }
+
     try {
         let chatDocument = await Chat.findOne({ user: userId });
         if (!chatDocument) {
             chatDocument = await Chat.create({ user: userId, messages: [] });
         }
 
-        // --- FIX 3: Correct Role Mapping ---
+        // --- FIX: Map history correctly for the SDK ---
         const historyForGemini = chatDocument.messages.map(msg => ({
-            role: msg.sender === 'user' ? 'user' : 'model', // Must be 'model'
+            role: msg.sender === 'user' ? 'user' : 'model', 
             parts: [{ text: msg.text }]
         }));
 
-        // --- FIX 4: Proper System Instruction Implementation ---
+        // --- FIX: Use the official systemInstruction parameter ---
         const model = genAI.getGenerativeModel({ 
             model: "gemini-1.5-flash",
-            systemInstruction: systemInstruction // This keeps Aura's personality stable
+            systemInstruction: systemInstruction // Uses your long prompt variable
         });
 
+        // Start chat with cleaned history
         const chatSession = model.startChat({
-            history: historyForGemini
+            history: historyForGemini,
+            generationConfig: {
+                maxOutputTokens: 800,
+                temperature: 0.7,
+            },
         });
 
         const result = await chatSession.sendMessage(message);
         const response = await result.response;
         const aiResponseText = response.text();
 
-        // Save to DB (Keep your 'ai' sender name here for your frontend)
-        chatDocument.messages.push({ sender: 'user', text: message });
-        chatDocument.messages.push({ sender: 'ai', text: aiResponseText });
+        // Persist to Database (keeping your 'ai' tag for the frontend)
+        chatDocument.messages.push({
+            sender: 'user',
+            text: message,
+            timestamp: new Date()
+        });
+
+        const aiMessage = {
+            sender: 'ai',
+            text: aiResponseText,
+            timestamp: new Date()
+        };
+        chatDocument.messages.push(aiMessage);
 
         await chatDocument.save();
 
         res.json({
             response: aiResponseText,
-            timestamp: new Date()
+            timestamp: aiMessage.timestamp
         });
 
     } catch (error) {
-        console.error('Gemini Chat Error:', error);
-        res.status(500).json({ message: 'Aura is having trouble connecting.' });
+        console.error('Gemini Chat Error:', error); // Check your Railway logs for this!
+        res.status(500).json({ message: 'Aura is having trouble connecting. Please try again later.' });
     }
 };
-
 // @desc Get the full chat history
 exports.getHistory = async (req, res) => {
     const userId = req.user._id;
