@@ -17,7 +17,12 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Middleware
-app.use(cors({ origin: '*', credentials: true })); 
+app.use(cors({
+  origin: 'https://maurahm.github.io', // Your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 app.use(express.json()); 
 
 // Rate Limiter to prevent abuse
