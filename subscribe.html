@@ -29,7 +29,6 @@
             overflow: hidden;
         }
 
-        /* Ambient Mesh Gradient Background */
         .mesh-gradient {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -40,7 +39,6 @@
                 radial-gradient(at 50% 50%, rgba(255, 47, 166, 0.05) 0px, transparent 80%);
         }
 
-        /* Floating Aurora Orbs */
         .aurora {
             position: absolute;
             width: 600px; height: 600px;
@@ -129,11 +127,6 @@
             transition: 0.3s ease;
         }
 
-        .feature-item:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: var(--accent);
-        }
-
         .feature-icon {
             width: 32px; height: 32px;
             background: rgba(255, 47, 166, 0.1);
@@ -171,14 +164,6 @@
             font-weight: 600;
             transition: 0.3s;
             text-align: center;
-            letter-spacing: 1px;
-        }
-
-        .input-field:focus {
-            outline: none;
-            border-color: var(--accent);
-            background: rgba(0,0,0,0.5);
-            box-shadow: 0 0 20px rgba(255, 47, 166, 0.1);
         }
 
         #pay-btn {
@@ -191,7 +176,7 @@
             font-size: 18px;
             font-weight: 800;
             cursor: pointer;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: 0.4s;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -199,17 +184,14 @@
         }
 
         #pay-btn:hover {
-            transform: scale(1.02);
             background: var(--accent);
             color: #fff;
-            box-shadow: 0 20px 40px rgba(255, 47, 166, 0.3);
         }
 
         #pay-btn:disabled {
             background: #222;
             color: #555;
             cursor: not-allowed;
-            transform: none;
         }
 
         .secure-footer {
@@ -242,18 +224,11 @@
                         <div style="font-size: 12px; color: #777;">Unlimited access to Aura AI</div>
                     </div>
                 </div>
-                <div class="feature-item">
-                    <div class="feature-icon">📊</div>
-                    <div>
-                        <div style="font-weight: 600; font-size: 14px;">Weekly Insights</div>
-                        <div style="font-size: 12px; color: #777;">Advanced mental health reports</div>
-                    </div>
-                </div>
             </div>
 
             <div class="input-group">
                 <label>M-PESA NUMBER</label>
-                <input type="tel" id="phone" class="input-field" placeholder="07XX XXX XXX" maxlength="12">
+                <input type="tel" id="phone" class="input-field" placeholder="07XX XXX XXX">
             </div>
 
             <button id="pay-btn">
@@ -269,7 +244,7 @@
     </div>
 
     <script>
-    // 1. Initialize the SDK strictly for LIVE
+    // 1. Initialize for LIVE MODE
     const intasend = new window.IntaSend({
         publicAPIKey: "ISPubKey_live_d0d3e243-2fad-4268-bd05-4320a8fc7b6d",
         live: true 
@@ -281,50 +256,45 @@
     payBtn.addEventListener('click', () => {
         let phone = phoneInput.value.trim();
         
-        // Normalize phone number format to 254XXXXXXXXX
+        // Clean phone number
+        phone = phone.replace(/\D/g, ''); 
         if (phone.startsWith('0')) {
             phone = '254' + phone.slice(1);
-        } else if (phone.startsWith('+254')) {
-            phone = phone.replace('+', '');
         } else if (phone.startsWith('7') || phone.startsWith('1')) {
             phone = '254' + phone;
         }
 
-        // Validate the format strictly
         if (!/^254(7|1)\d{8}$/.test(phone)) {
-            alert("Please enter a valid M-Pesa number (e.g., 0712345678) 🌸");
+            alert("Invalid M-Pesa number.");
             return;
         }
 
         payBtn.disabled = true;
-        payBtn.innerHTML = `<span>Connecting...</span>`;
+        payBtn.innerHTML = `<span>Requesting STK...</span>`;
 
-        // 2. The Run Command with Unique Ref to prevent 400 errors
+        // 2. THE FIX FOR 400 "Enter a valid URL"
         intasend.run({
             amount: 300,
             currency: "KES",
             phone_number: phone,
             email: localStorage.getItem('user_email') || "customer@aura.app",
-            api_ref: "AURA_" + Math.floor(Math.random() * 1000000), 
-            method: "M-PESA"
+            api_ref: "AuraLive_" + Math.floor(Date.now() / 1000),
+            method: "M-PESA",
+            // CRITICAL: Force the host and redirect URL so the server validates the request
+            host: window.location.origin, 
+            redirect_url: window.location.origin + "/Dashboard.html" 
         })
         .on("COMPLETE", (results) => {
-            console.log("Payment Success", results);
             localStorage.setItem('justPaid', 'true');
             window.location.href = "Dashboard.html";
         })
         .on("FAILED", (results) => {
-            console.error("Payment Failed", results);
             payBtn.disabled = false;
             payBtn.innerHTML = `<span>Activate Now</span>`;
-            
-            // Extract clear error message
-            let errorMsg = results.error || "Transaction cancelled or failed.";
-            alert("M-Pesa Notice: " + errorMsg);
+            alert("Payment Failed: " + (results.error || "Please try again."));
         })
         .on("IN-PROGRESS", () => {
-            payBtn.innerHTML = `<span>Check Phone 📱</span>`;
-            console.log("STK Push triggered for:", phone);
+            payBtn.innerHTML = `<span>Enter PIN 📱</span>`;
         });
     });
     </script>

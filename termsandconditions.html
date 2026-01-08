@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms & Conditions — Aura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --color-bg: #1A0A17;
+            --color-panel: #2B1528;
+            --color-accent: #FF5AA8;
+            --color-muted: #D9C9DC;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-muted);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+        }
+
+        .hero-bg {
+            background: radial-gradient(at 10% 10%, #4B1A45 0%, transparent 50%),
+                        radial-gradient(at 90% 70%, #2B1528 0%, transparent 60%);
+        }
+
+        .section-card {
+            background-color: var(--color-panel);
+            border: 1px solid rgba(255, 90, 168, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #FFFFFF 0%, var(--color-accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .legal-index {
+            color: var(--color-accent);
+            font-family: monospace;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+<nav class="sticky top-0 z-50 bg-[#1A0A17]/90 backdrop-blur-md border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <a href="index.html" class="text-2xl font-extrabold tracking-wider transition hover:scale-105"
+           style="background: linear-gradient(90deg, var(--color-accent), #FF80BD); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            <i data-lucide="sparkles" class="inline-block w-6 h-6 mr-1"></i> Aura
+        </a>
+        <a href="Signup.html" class="text-sm font-semibold text-muted hover:text-accent transition">Create Account</a>
+    </div>
+</nav>
+
+<header class="hero-bg py-20 px-4 text-center">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-4xl sm:text-6xl font-black mb-6 text-gradient">Terms of Service</h1>
+        <p class="text-lg text-muted/70">The rules of the road for using the Aura platform.</p>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-6 py-12">
+    
+    <div class="space-y-8">
+        
+        <div class="section-card p-8 rounded-2xl">
+            <h2 class="text-xl font-bold text-white mb-4">1. Acceptance of Terms</h2>
+            <p class="text-muted/80">
+                By accessing or using Aura, you agree to be bound by these Terms and Conditions. If you do not agree, please do not use the service. We provide an AI-powered emotional support tool designed for wellness and peer-support.
+            </p>
+        </div>
+
+        <div class="section-card p-8 rounded-2xl border-l-4 border-accent">
+            <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                <i data-lucide="alert-circle" class="mr-2 text-accent"></i> 2. No Medical Advice
+            </h2>
+            <p class="text-muted/80 mb-4">
+                <span class="text-white font-bold underline">Aura is NOT a medical professional.</span> The AI companion does not provide clinical diagnosis, psychotherapy, or medical prescriptions. 
+            </p>
+            <p class="text-sm text-accent italic">
+                Aura is a tool for self-reflection and emotional support. It is not a replacement for professional psychiatric care or crisis intervention.
+            </p>
+        </div>
+
+        <div class="section-card p-8 rounded-2xl">
+            <h2 class="text-xl font-bold text-white mb-4">3. Subscriptions & Payments</h2>
+            <p class="text-muted/80">
+                Aura offers premium features for a subscription fee (e.g., 300 KES/month). 
+            </p>
+            <ul class="list-disc ml-6 mt-2 text-sm text-muted/60 space-y-1">
+                <li>Payments are non-refundable.</li>
+                <li>Subscriptions renew automatically unless cancelled.</li>
+                <li>We reserve the right to adjust pricing with prior notice.</li>
+            </ul>
+        </div>
+
+        <div class="section-card p-8 rounded-2xl">
+            <h2 class="text-xl font-bold text-white mb-4">4. Proper Use</h2>
+            <p class="text-muted/80">
+                You agree not to use Aura to generate harmful, illegal, or harassing content. Any attempt to exploit the AI's programming or bypass safety filters may result in immediate account termination without refund.
+            </p>
+        </div>
+
+        <div class="section-card p-8 rounded-2xl">
+            <h2 class="text-xl font-bold text-white mb-4">5. Limitation of Liability</h2>
+            <p class="text-muted/80">
+                In no event shall Aura Mental Health or its developers be liable for any damages arising out of the use or inability to use the service, including reliance on any information provided by the AI.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="mt-16 text-center">
+        <p class="text-sm text-muted/50 mb-4">Have questions about these terms?</p>
+        <a href="support.html" class="inline-flex items-center text-accent font-bold hover:underline">
+            <i data-lucide="help-circle" class="w-4 h-4 mr-2"></i> Contact Support Team
+        </a>
+    </div>
+
+</main>
+
+<footer class="py-10 text-center opacity-30 text-xs">
+    © 2026 Aura Mental Health. All rights reserved.
+</footer>
+
+<script>
+    lucide.createIcons();
+</script>
+</body>
+</html>

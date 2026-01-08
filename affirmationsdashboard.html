@@ -1,365 +1,206 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Affirmations </title>
-<style>
-  :root{
-    /* Softer, more cohesive colors */
-    --bg: #291124; /* Darker, calmer background */
-    --panel: #3a1c31; /* Subtle contrast for the main panel */
-    --card: #5a284c; /* Unused in this version, but good to keep */
-    --tile-start: #d973f0; /* Pinkish-Purple */
-    --tile-end: #ff2fa6; /* Bright Magenta */
-    --accent: #ff2fa6;
-    --muted: #e0e0e0; /* Slightly brighter for better contrast */
-    --white: #ffffff;
-    --shadow: rgba(0,0,0,0.55);
-  }
-  html,body{
-    height:100%;
-    margin:0;
-    font-family:'Segoe UI',Roboto,"Helvetica Neue",Arial,sans-serif; /* A more common, readable font stack */
-    background:var(--bg);
-    color:var(--white);
-    line-height:1.5;
-  }
-  .wrap{
-    min-height:100%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:32px 16px;
-    box-sizing:border-box;
-  }
-  .panel{
-    width:100%;
-    max-width:900px;
-    background:var(--panel);
-    border-radius:16px;
-    padding:32px;
-    box-shadow:0 15px 40px var(--shadow);
-    box-sizing:border-box;
-    border:1px solid rgba(255,255,255,0.05); /* Subtle border for depth */
-  }
-  .header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:28px;
-    padding-bottom:10px;
-    border-bottom:1px solid rgba(255,255,255,0.08);
-  }
-  .title{
-    font-weight:600;
-    font-size:26px; /* Larger title */
-    color:var(--white);
-  }
-  .sub{
-    color:var(--muted);
-    font-size:15px;
-  }
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); /* Better responsiveness */
-    gap:20px;
-    margin:30px auto 0;
-  }
-  .tile{
-    background:linear-gradient(135deg, var(--tile-start), var(--tile-end)); /* Vibrant gradient */
-    color:var(--white);
-    padding:40px 20px;
-    border:0;
-    border-radius:12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:700;
-    font-size:18px;
-    cursor:pointer;
-    box-shadow:0 6px 18px rgba(0,0,0,0.25);
-    transition:transform .15s ease,box-shadow .15s ease,opacity .15s ease;
-    text-align:center;
-    outline:none;
-  }
-  .tile:focus,.tile:hover{
-    transform:translateY(-4px); /* Softer lift */
-    box-shadow:0 12px 30px rgba(0,0,0,0.4);
-    opacity:0.95;
-  }
-  .tile:focus-visible { /* Better focus visibility */
-    outline: 2px solid var(--muted);
-    outline-offset: 4px;
-  }
-  .note{
-    color:var(--muted);
-    text-align:center;
-    margin-top:25px;
-    font-size:14px;
-    opacity:0.8;
-  }
-  .back{
-    background:rgba(255,255,255,0.06);
-    border:1px solid rgba(255,255,255,0.1);
-    color:var(--muted);
-    padding:10px 18px;
-    border-radius:10px;
-    text-decoration:none;
-    font-size:14px;
-    transition:background .15s ease;
-  }
-  .back:hover{
-    background:rgba(255,255,255,0.12);
-  }
-  /* modal */
-  .backdrop{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.7); /* Darker backdrop */
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:1000; /* High z-index */
-  }
-  .modal{
-    background:#200e1b; /* Even darker, highly contrasting background */
-    padding:24px;
-    border-radius:16px;
-    max-width:600px; /* Slightly narrower modal */
-    width:90%;
-    box-shadow:0 40px 100px rgba(0,0,0,0.8);
-    color:var(--white);
-    max-height:80vh;
-    overflow-y:auto;
-    border:1px solid var(--accent); /* Accent border */
-  }
-  .modal h2{
-    margin:0 0 10px;
-    font-size:22px;
-    font-weight:600;
-  }
-  .list{
-    display:grid;
-    gap:15px;
-  }
-  .affirm{
-    background:rgba(255,255,255,0.05);
-    padding:15px;
-    border-radius:12px;
-    color:var(--muted);
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    cursor:pointer;
-    transition:background .15s ease;
-    border:1px solid transparent;
-  }
-  .affirm:hover{
-    background:rgba(255,255,255,0.1);
-    border-color:var(--accent); /* Highlight on hover */
-  }
-  .affirm .text{
-    max-width:80%;
-    font-size:16px;
-    line-height:1.4;
-    font-style:italic; /* Subtle stylistic change */
-  }
-  .affirm button{
-    background:var(--accent); /* Solid accent color */
-    border:0;
-    color:#fff;
-    padding:8px 14px;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:600;
-    transition:opacity .1s ease;
-  }
-  .affirm button:hover{
-    opacity:0.9;
-  }
-  .close{
-    background:transparent;
-    border:1px solid rgba(255,255,255,0.15);
-    color:var(--muted);
-    cursor:pointer;
-    font-size:14px;
-    padding:6px 10px;
-    border-radius:8px;
-    transition:border-color .15s ease, color .15s ease;
-  }
-  .close:hover{
-    border-color:var(--white);
-    color:var(--white);
-  }
-  @media (max-width:768px){ 
-    .panel{padding:24px;border-radius:12px;}
-    .grid{grid-template-columns:repeat(2,1fr)}
-    .tile{padding:30px 15px;font-size:17px}
-  }
-  @media (max-width:500px){
-    .wrap{padding:16px;}
-    .grid{grid-template-columns:1fr; gap:16px;}
-    .tile{padding:25px;font-size:16px}
-    .header{flex-direction:column;align-items:flex-start;margin-bottom:20px;}
-    .title{font-size:24px;}
-    .back{margin-top:10px;align-self:flex-end;}
-  }
-</style>
-<script src="theme-manager.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
+    <title>Affirmations | Aura</title>
+    <style>
+        :root {
+            --bg: #2c0f26; 
+            --accent: #ff2fa6; 
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.04);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        html, body {
+            height: 100%; margin: 0; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg); color: var(--white); 
+            overflow-x: hidden; -webkit-font-smoothing: antialiased;
+            t
+        }
+
+        .ambient-bg {
+            position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+        }
+        .glow {
+            position: absolute; width: 80vw; height: 80vw; border-radius: 50%;
+            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+            opacity: 0.1; filter: blur(100px); animation: drift 30s infinite alternate;
+        }
+        @keyframes drift { from { transform: translate(-10%, -10%); } to { transform: translate(20%, 20%); } }
+
+        .container { position: relative; z-index: 1; padding: 50px 24px; max-width: 900px; margin: 0 auto; }
+        
+        .nav { margin-bottom: 50px; }
+        .back-btn {
+            text-decoration: none; color: var(--white); font-size: 10px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 2px;
+            background: var(--glass); padding: 12px 24px; border-radius: 100px;
+            border: 1px solid var(--border); backdrop-filter: blur(15px);
+            transition: 0.3s ease;
+        }
+        .back-btn:hover { background: var(--white); color: var(--bg); transform: translateY(-2px); }
+
+        header { text-align: center; margin-bottom: 60px; }
+        h1 { 
+            font-size: 2.2rem; /* Reduced from 3.8rem */
+            font-weight: 800; letter-spacing: -1.5px; margin: 0;
+            background: linear-gradient(180deg, #fff 40%, rgba(255,255,255,0.5));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        header p { font-size: 0.95rem; opacity: 0.5; margin-top: 12px; font-weight: 400; }
+
+        /* Refined Grid */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+            gap: 20px; 
+        }
+        
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 45px 30px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.5s cubic-bezier(0.2, 1, 0.2, 1);
+            backdrop-filter: blur(20px);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.07);
+            border-color: var(--accent);
+        }
+
+        .card h3 { font-size: 1.4rem; margin: 0; font-weight: 700; letter-spacing: -0.5px; }
+        .card .subtitle { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin-top: 10px; opacity: 0.7; }
+
+        /* Modal Overlay */
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(30px); z-index: 2000;
+            display: none; align-items: center; justify-content: center; padding: 25px;
+        }
+
+        .modal {
+            width: 100%; max-width: 480px; text-align: center;
+            animation: modalFade 0.4s ease-out;
+        }
+        @keyframes modalFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .modal h2 { font-size: 2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 30px; }
+        
+        .list-container { display: flex; flex-direction: column; gap: 12px; max-height: 60vh; overflow-y: auto; padding-right: 8px; }
+        .list-container::-webkit-scrollbar { width: 3px; }
+        .list-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .pill {
+            background: var(--glass); border-radius: 24px;
+            padding: 22px; cursor: pointer; transition: 0.3s;
+            border: 1px solid var(--border);
+        }
+        .pill:hover { background: var(--white); color: var(--bg); font-weight: 700; border-color: transparent; }
+        .pill span { font-size: 1.05rem; line-height: 1.5; font-weight: 400; }
+
+        .close-btn { 
+            margin-top: 35px; background: none; border: none;
+            color: var(--white); opacity: 0.4; cursor: pointer; font-size: 11px; 
+            text-transform: uppercase; letter-spacing: 2px; font-weight: 700;
+        }
+        .close-btn:hover { opacity: 1; }
+
+        #notif {
+            position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--white); color: var(--bg); padding: 14px 30px; border-radius: 100px;
+            font-weight: 800; font-size: 11px; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 3000;
+        }
+        #notif.active { transform: translateX(-50%) translateY(0); }
+    </style>
 </head>
 <body>
-    <script>
-    // --- 🔑 AUTHENTICATION GUARD SCRIPT (MUST RUN FIRST) ---
-    const TOKEN_KEY = 'convai_user_token';
-    const token = localStorage.getItem(TOKEN_KEY);
 
-    // If the token is missing (meaning the user logged out), redirect immediately.
-    if (!token) {
-        window.location.href = 'index.html';
-    }
-    // --- END GUARD SCRIPT ---
-</script>
-  <main class="wrap" role="main" aria-labelledby="affTitle">
-    <section class="panel" aria-labelledby="affTitle">
-      <div class="header">
-        <div>
-          <div id="affTitle" class="title">Affirmations</div>
-          <div class="sub">Select a category to view short, supportive affirmations you can copy or read aloud.</div>
-        </div>
-        <div><a href="Dashboard.html" class="back">Back</a></div>
-      </div>
+<div class="ambient-bg">
+    <div class="glow" style="top: -5%; left: -5%;"></div>
+    <div class="glow" style="bottom: -5%; right: -5%;"></div>
+</div>
 
-      <div class="grid" role="list" id="categories">
-        <!-- tiles inserted by JS -->
-      </div>
+<div class="container">
+    <nav class="nav">
+        <a href="Dashboard.html" class="back-btn">Back</a>
+    </nav>
+    
+    <header>
+        <h1>Daily Affirmations</h1>
+        <p>Intentions for your softest self</p>
+    </header>
 
-      <div class="note">Tip: click an affirmation to copy it to your clipboard.</div>
-    </section>
-  </main>
+    <div class="grid" id="mainGrid"></div>
+</div>
 
-  <div id="backdrop" class="backdrop" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal" role="document" aria-labelledby="modalTitle">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <h2 id="modalTitle">Category</h2>
-        <div>
-          <button id="closeModal" class="close" aria-label="Close">Close</button>
-        </div>
-      </div>
-      <div id="affirmList" class="list" role="list">
-        <!-- affirmations injected here -->
-      </div>
+<div id="overlay" class="overlay" onclick="closeM()">
+    <div class="modal" onclick="event.stopPropagation()">
+        <h2 id="mTitle"></h2>
+        <div id="mList" class="list-container"></div>
+        <button class="close-btn" onclick="closeM()">Close</button>
     </div>
-  </div>
+</div>
 
+<div id="notif">SAVED TO HEART ✨</div>
+
+<script src="theme-manager.js"></script>
 <script>
-  const categories = {
-    Gratitude: [
-      "I am grateful for the good in my life.",
-      "I notice and appreciate small blessings today.",
-      "Thank you for the people who support me."
-    ],
-    Calm: [
-      "I breathe in peace and exhale tension.",
-      "I am grounded and present in this moment.",
-      "I allow calm to wash over me."
-    ],
-    Growth: [
-      "I learn and grow from every experience.",
-      "I am patient with my progress.",
-      "Challenges help me become stronger."
-    ],
-    Abundance: [
-      "I am open to receiving abundance in many forms.",
-      "There is enough for me and for others.",
-      "Opportunities flow to me easily."
-    ],
-    Resilience: [
-      "I recover from setbacks with grace.",
-      "I trust my ability to handle difficult times.",
-      "Each day I become more resilient."
-    ],
-    Hope: [
-      "I hold space for hope and possibility.",
-      "Tomorrow brings new opportunities.",
-      "I believe in my capacity to heal and change."
-    ]
-  };
+    const DATA = {
+        "Clarity": ["I am focused on my path.", "My vision is clear and calm.", "I trust the timing of my life.", "I choose focus over chaos.", "My intuition is my compass."],
+        "Softness": ["I am allowed to rest.", "I am blooming at my own pace.", "I am kind to my inner child.", "Rest is productive energy.", "Peace is my natural state."],
+        "Abundance": ["I am a magnet for goodness.", "I am open to receiving.", "I lack for nothing today.", "I am worthy of great things.", "I have more than enough."],
+        "Courage": ["I am brave enough to be me.", "I own my voice and power.", "I am stronger than my fears.", "I am capable of hard things.", "I lead with my heart."],
+        "Magic": ["I notice the miracles daily.", "I am in sync with the universe.", "Today holds wonder for me.", "I create my own reality.", "Magic is all around me."],
+        "Balance": ["I am grounded and steady.", "I honor my boundaries.", "I am at peace with what is.", "I am centered in my power.", "I am in flow."]
+    };
 
-  const categoriesEl = document.getElementById('categories');
-  const backdrop = document.getElementById('backdrop');
-  const modalTitle = document.getElementById('modalTitle');
-  const affirmList = document.getElementById('affirmList');
-  const closeModal = document.getElementById('closeModal');
+    function init() {
+        const grid = document.getElementById('mainGrid');
+        Object.keys(DATA).forEach(cat => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<h3>${cat}</h3><div class="subtitle">Refresh Daily</div>`;
+            card.onclick = () => openM(cat);
+            grid.appendChild(card);
+        });
+    }
 
-  function buildTiles() {
-    Object.keys(categories).forEach(key => {
-      const btn = document.createElement('button');
-      btn.className = 'tile';
-      btn.setAttribute('role','button');
-      btn.tabIndex = 0;
-      btn.innerText = key;
-      btn.dataset.category = key;
-      btn.addEventListener('click', () => openCategory(key));
-      btn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCategory(key); }});
-      categoriesEl.appendChild(btn);
-    });
-  }
+    function openM(cat) {
+        document.getElementById('mTitle').innerText = cat;
+        const list = document.getElementById('mList');
+        list.innerHTML = '';
+        DATA[cat].forEach(txt => {
+            const pill = document.createElement('div');
+            pill.className = 'pill';
+            pill.innerHTML = `<span>${txt}</span>`;
+            pill.onclick = () => {
+                navigator.clipboard.writeText(txt);
+                const n = document.getElementById('notif');
+                n.classList.add('active');
+                setTimeout(() => n.classList.remove('active'), 2000);
+            };
+            list.appendChild(pill);
+        });
+        document.getElementById('overlay').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
 
-  function openCategory(name) {
-    modalTitle.textContent = name;
-    affirmList.innerHTML = '';
-    categories[name].forEach((txt, i) => {
-      const el = document.createElement('div');
-      el.className = 'affirm';
-      el.innerHTML = `<div class="text">${escapeHtml(txt)}</div><div><button data-t="${i}">Copy</button></div>`;
-      el.querySelector('button').addEventListener('click', () => {
-        copyToClipboard(txt);
-        el.querySelector('button').textContent = 'Copied';
-        setTimeout(() => el.querySelector('button').textContent = 'Copy', 1200);
-      });
-      // also allow clicking the affirmation to copy
-      el.addEventListener('click', (e) => {
-        if (e.target.tagName.toLowerCase() !== 'button') {
-          copyToClipboard(txt);
-          const btn = el.querySelector('button');
-          btn.textContent = 'Copied';
-          setTimeout(() => btn.textContent = 'Copy', 1200);
-        }
-      });
-      affirmList.appendChild(el);
-    });
-    backdrop.style.display = 'flex';
-    backdrop.setAttribute('aria-hidden','false');
-    closeModal.focus();
-  }
-
-  function close() {
-    backdrop.style.display = 'none';
-    backdrop.setAttribute('aria-hidden','true');
-  }
-
-  closeModal.addEventListener('click', close);
-  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && backdrop.style.display === 'flex') close(); });
-
-  function copyToClipboard(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).catch(()=>fallbackCopy(text));
-    } else fallbackCopy(text);
-  }
-  function fallbackCopy(t) {
-    const ta = document.createElement('textarea');
-    ta.value = t; ta.style.position='fixed'; ta.style.left='-9999px';
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); } catch(e) {}
-    document.body.removeChild(ta);
-  }
-
-  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-  buildTiles();
+    function closeM() { 
+        document.getElementById('overlay').style.display = 'none'; 
+        document.body.style.overflow = 'auto';
+    }
+    
+    init();
+    if (typeof applyTheme === "function") {
+        applyTheme(localStorage.getItem('user-theme') || 'pink');
+    }
 </script>
 </body>
 </html>

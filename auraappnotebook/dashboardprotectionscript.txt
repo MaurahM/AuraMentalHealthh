@@ -1,0 +1,409 @@
+
+DASHBOARD
+<script>
+(async function() {
+  const token = localStorage.getItem('convai_user_token');
+  
+  // 1. If no token, they aren't logged in at all
+  if (!token) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  try {
+    // 2. IMPORTANT: Verify actual subscription status from the DB
+    // Replace URL with your actual hosted backend URL
+    const response = await fetch('http://localhost:5000/api/auth/verify-status', {
+      method: 'GET',
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const data = await response.json();
+
+    if (!data.isPaid) {
+      // If server says they haven't paid, clear local status and boot them
+      localStorage.setItem('aura_paid_status', 'false');
+      window.location.href = 'subscribe.html';
+    } else {
+      // Store expiry date for the Profile page
+      localStorage.setItem('aura_expiry', data.subscriptionExpiry);
+    }
+  } catch (err) {
+    console.log("Offline mode: Using cached status.");
+    if (localStorage.getItem('aura_paid_status') !== 'true') {
+      window.location.href = 'subscribe.html';
+    }
+  }
+})();
+</script>
+
+SHOULD BE AT THE TOP, ABOVE THE MAIN PART
+
+
+CHAT
+      <script>
+    // --- 🔑 AUTHENTICATION GUARD ---
+const TOKEN_KEY = 'convai_user_token';
+const token = localStorage.getItem(TOKEN_KEY);
+
+if (!token) {
+    window.location.href = 'index.html';
+}
+
+const BASE_API_URL = "https://auramentalhealthh-production.up.railway.app/api/chat"; 
+
+const getHeaders = (contentType = 'application/json') => ({
+    'Content-Type': contentType,
+    'Authorization': `Bearer ${token}`
+});
+
+</script> 
+
+
+Previous chat code (frontend)
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Aura | Chat Space</title>
+    <style>
+        :root {
+            --bg: #1A0A17; /* Matches your landing page deep purple */
+            --panel: rgba(43, 21, 40, 0.7);
+            --muted: #d9c9dc;
+            --pink: #ff2fa6;
+            --bubble-left: rgba(255, 255, 255, 0.05);
+            --bubble-right: linear-gradient(90deg, #d94aa0, #ff5aa8);
+            --white: #ffffff;
+            --accent-glow: rgba(255, 47, 166, 0.3);
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            background-image: radial-gradient(circle at top right, #3b1534, var(--bg));
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .wrap {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* The Main Premium Panel */
+        .panel {
+            width: 100%;
+            max-width: 1100px;
+            height: 90vh;
+            background: var(--panel);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px; /* Large, premium rounding */
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 24px 32px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .title {
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        .messages::-webkit-scrollbar { width: 6px; }
+        .messages::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+
+        .msg {
+            max-width: 70%;
+            padding: 16px 20px;
+            border-radius: 24px;
+            font-size: 15px;
+            line-height: 1.6;
+            position: relative;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .left {
+            align-self: flex-start;
+            background: var(--bubble-left);
+            color: var(--white);
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .right {
+            align-self: flex-end;
+            background: var(--bubble-right);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 10px 25px var(--accent-glow);
+        }
+
+        .meta {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            color: var(--pink);
+        }
+
+        /* Composer Area */
+        .composer-section {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 24px 32px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .composer {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            padding: 14px 24px;
+            color: var(--white);
+            outline: none;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--pink);
+            box-shadow: 0 0 15px rgba(255, 47, 166, 0.2);
+        }
+
+        .btn-send {
+            background: var(--bubble-right);
+            border: 0;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            box-shadow: 0 5px 15px rgba(255, 47, 166, 0.3);
+        }
+
+        .btn-send:hover { transform: scale(1.1); }
+
+        .btn-clear {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 18px;
+            border-radius: 100px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-clear:hover { border-color: var(--pink); color: var(--pink); }
+
+        /* Emergency Link Styling */
+        .emergency-bar {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .btn-emergency {
+            color: #ff4b4b;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 8px 20px;
+            border: 1px solid rgba(255, 75, 75, 0.2);
+            border-radius: 100px;
+            transition: all 0.3s;
+        }
+
+        .btn-emergency:hover {
+            background: #ff4b4b;
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 75, 75, 0.4);
+        }
+
+        @media (max-width: 760px) {
+            .panel { height: 100vh; border-radius: 0; }
+            .msg { max-width: 85%; }
+            .wrap { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<main class="wrap">
+    <section class="panel">
+        <div class="header">
+            <div class="title">Aura Space 💗</div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <button id="clear" class="btn-clear">Clear</button>
+                <a href="Dashboard.html" style="color:var(--white); text-decoration:none; font-weight:bold; font-size:18px">✕</a>
+            </div>
+        </div>
+
+        <div class="chat-area">
+            <div id="messages" class="messages">
+                <div class="msg left">
+                    <div class="meta">Aura</div>
+                    Hello Love, I'm here to listen. How are you feeling today?
+                </div>
+            </div>
+
+            <div class="composer-section">
+                <div class="composer">
+                    <textarea id="input" class="input" placeholder="Share your thoughts..." rows="1"></textarea>
+                    <button id="send" class="btn-send">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="emergency-bar">
+                    <a href="Escalation.html" class="btn-emergency">Emergency Services</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+    // YOUR ORIGINAL LOGIC - UNCHANGED
+    (function () {
+        const messagesEl = document.getElementById("messages");
+        const inputEl = document.getElementById("input");
+        const sendBtn = document.getElementById("send");
+        const clearBtn = document.getElementById("clear");
+
+        // Bypass for local testing
+        const token = localStorage.getItem('convai_user_token') || "test_token";
+
+        const BASE_API_URL = "https://auramentalhealthh-production.up.railway.app/api/chat"; 
+        
+        const getHeaders = (contentType = 'application/json') => ({
+            'Content-Type': contentType,
+            'Authorization': `Bearer ${token}`
+        });
+
+        function appendMessage(text, side = "right", who = "") {
+            const wrap = document.createElement("div");
+            wrap.className = `msg ${side}`;
+            if (who) {
+                const meta = document.createElement("div");
+                meta.className = "meta";
+                meta.textContent = who;
+                wrap.appendChild(meta);
+            }
+            const textNode = document.createElement("div");
+            textNode.innerHTML = text.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])).replace(/\n/g, "<br>");
+            wrap.appendChild(textNode);
+            messagesEl.appendChild(wrap);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        async function send() {
+            const raw = inputEl.value.trim();
+            if (!raw) return;
+            appendMessage(raw, "right", "You");
+            inputEl.value = "";
+            inputEl.style.height = "auto";
+            
+            const typingNode = document.createElement("div");
+            typingNode.className = "msg left";
+            typingNode.innerHTML = `<div class="meta">Aura 💗</div><div>...</div>`;
+            messagesEl.appendChild(typingNode);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+
+            try {
+                const res = await fetch(`${BASE_API_URL}/message`, {
+                    method: "POST",
+                    headers: getHeaders(),
+                    body: JSON.stringify({ message: raw }),
+                });
+                const data = await res.json();
+                typingNode.remove();
+                appendMessage(data.response || "I'm here for you.", "left", "Aura 💗");
+            } catch (err) {
+                typingNode.remove();
+                appendMessage("I'm having trouble connecting, but I'm still listening.", "left", "Aura 💗");
+            }
+        }
+
+        sendBtn.addEventListener("click", send);
+        inputEl.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
+        
+        inputEl.addEventListener("input", () => {
+            inputEl.style.height = "auto";
+            inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + "px";
+        });
+    })();
+</script>
+
+</body>
+</html>

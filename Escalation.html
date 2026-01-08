@@ -1,210 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=0" />
+    <title>Aura | Support</title>
+    <style>
+        :root {
+            --bg: #1b1b1b; 
+            --accent: #ff2fa6; 
+            --white: #ffffff;
+            --glass: rgba(255, 255, 255, 0.04);
+            --border: rgba(255, 255, 255, 0.1);
+            --muted: rgba(255, 255, 255, 0.5);
+        }
 
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Emergency Services — Conversational AI</title>
-<style>
-  :root{
-    --bg:#3b1534;
-    --panel:#5a2450;
-    --pill:#e6e0e7;
-    --accent:#8a3cff;
-    --pink:#ff2fa6;
-    --white:#ffffff;
-    --muted:#d9c9dc;
-  }
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;background:var(--bg);color:var(--white)}
-  .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:48px;box-sizing:border-box}
-  .panel{width:100%;max-width:1100px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));border-radius:8px;padding:40px;box-shadow:0 20px 50px rgba(0,0,0,0.45)}
-  .title{text-align:center;margin-bottom:28px}
-  h1{font-size:28px;margin:0;font-weight:700}
-  p.lead{margin:8px 0 0;color:var(--muted);text-align:center}
-  .rows{display:flex;gap:28px;align-items:center;justify-content:center;margin-top:28px;flex-wrap:wrap}
-  .oval{
-    background:var(--pill);
-    color:#222;
-    width:220px;
-    height:300px;
-    border-radius:120px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:18px;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 18px rgba(0,0,0,0.35);
-    border:1px solid rgba(0,0,0,0.06);
-    text-align:center;
-    cursor:pointer;
-    transition:transform .12s ease, box-shadow .12s ease;
-  }
-  .oval:focus,.oval:hover{transform:translateY(-6px);box-shadow:0 18px 36px rgba(0,0,0,0.5);outline:none}
-  .icon-circle{width:92px;height:92px;border-radius:20px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(255,255,255,0.02))}
-  .icon{width:52px;height:52px;fill:var(--pink)}
-  .label{font-weight:700;color:#333;font-size:15px}
-  .sub{font-size:13px;color:#444;max-width:170px}
-  .note{margin-top:22px;color:var(--muted);font-size:13px;text-align:center}
-  .links{display:flex;gap:12px;justify-content:center;margin-top:18px}
-  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.12);color:var(--white);padding:8px 12px;border-radius:8px;cursor:pointer}
-  /* modal */
-  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:60}
-  .modal{background:var(--panel);padding:20px;border-radius:12px;max-width:420px;width:92%;box-shadow:0 20px 50px rgba(0,0,0,0.6);color:var(--white)}
-  .modal h2{margin:0 0 8px;font-size:18px}
-  .contact{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.02);margin:8px 0}
-  .contact .who{font-weight:600}
-  .contact a{background:linear-gradient(90deg,var(--pink),var(--accent));color:#fff;padding:8px 10px;border-radius:8px;text-decoration:none}
-  .close{background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:14px;margin-left:8px}
-  @media (max-width:720px){
-    .rows{flex-direction:column}
-    .oval{width:84%;height:180px;border-radius:36px;padding:18px}
-    .icon{width:42px;height:42px}
-  }
-</style>
-<script src="theme-manager.js"></script>
+        html, body {
+            height: 100%; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg); color: var(--white); overflow-x: hidden; -webkit-font-smoothing: antialiased;
+            transition: background 1.2s ease;
+        }
+
+        /* Ambient Glows */
+        .ambient-bg {
+            position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+        }
+        .glow {
+            position: absolute; width: 70vw; height: 70vw; border-radius: 50%;
+            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+            opacity: 0.08; filter: blur(100px); animation: drift 30s infinite alternate;
+        }
+        @keyframes drift { from { transform: translate(-10%, -10%); } to { transform: translate(15%, 15%); } }
+
+        .wrap { position: relative; z-index: 1; padding: 50px 24px; max-width: 900px; margin: 0 auto; }
+
+        /* Nav */
+        .nav-header { display: flex; justify-content: flex-start; margin-bottom: 50px; }
+        .back-btn {
+            text-decoration: none; color: var(--white); font-size: 10px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 2px;
+            background: var(--glass); padding: 12px 24px; border-radius: 100px;
+            border: 1px solid var(--border); backdrop-filter: blur(15px); transition: 0.3s;
+        }
+        .back-btn:hover { background: var(--white); color: #000; transform: translateY(-2px); }
+
+        /* Title Scaling */
+        header { text-align: center; margin-bottom: 60px; }
+        h1 { 
+            font-size: 2.2rem; font-weight: 800; letter-spacing: -1.5px; margin: 0;
+            background: linear-gradient(180deg, #fff 40%, rgba(255,255,255,0.5));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        header p { color: var(--muted); margin-top: 12px; font-size: 0.95rem; font-weight: 400; max-width: 500px; margin-inline: auto; line-height: 1.5; }
+
+        /* Emergency Cards */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+            gap: 20px; 
+        }
+
+        .action-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.2, 1, 0.2, 1);
+            backdrop-filter: blur(20px);
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .action-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent);
+        }
+
+        .icon-box {
+            width: 60px; height: 60px; border-radius: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 25px; border: 1px solid var(--border);
+        }
+        .icon-box svg { width: 28px; height: 28px; fill: var(--accent); }
+
+        .label { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+        .sub { font-size: 0.9rem; color: var(--muted); line-height: 1.4; }
+
+        .footer-note {
+            margin-top: 60px; text-align: center;
+            font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+            color: var(--muted); font-weight: 700; opacity: 0.6;
+        }
+
+        /* Modal styling */
+        .modal-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(30px); z-index: 2000;
+            display: none; align-items: center; justify-content: center; padding: 25px;
+        }
+        .modal {
+            width: 100%; max-width: 450px; 
+            animation: modalFade 0.4s ease-out;
+        }
+        @keyframes modalFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .modal h2 { font-size: 2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 30px; text-align: center; }
+        
+        .contact-item {
+            background: var(--glass); border: 1px solid var(--border);
+            padding: 20px; border-radius: 24px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .contact-item .who { font-weight: 700; font-size: 1.05rem; }
+        .contact-item .note-txt { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+        
+        .call-link {
+            background: var(--white); color: #000; text-decoration: none;
+            padding: 10px 18px; border-radius: 100px; font-weight: 800; font-size: 12px;
+            transition: 0.3s;
+        }
+        .call-link:hover { transform: scale(1.05); }
+
+        .close-btn { 
+            display: block; width: 100%; margin-top: 30px; background: none; border: none;
+            color: var(--white); opacity: 0.4; cursor: pointer; font-size: 11px; 
+            text-transform: uppercase; letter-spacing: 2px; font-weight: 700;
+        }
+    </style>
 </head>
 <body>
-    <script>
-    // --- 🔑 AUTHENTICATION GUARD SCRIPT (MUST RUN FIRST) ---
-    const TOKEN_KEY = 'convai_user_token';
-    const token = localStorage.getItem(TOKEN_KEY);
 
-    // If the token is missing (meaning the user logged out), redirect immediately.
-    if (!token) {
-        window.location.href = 'index.html';
-    }
-    // --- END GUARD SCRIPT ---
-</script>
-  <main class="wrap" role="main" aria-labelledby="escalateTitle">
-    <section class="panel" aria-labelledby="escalateTitle">
-      <header class="title">
-        <h1 id="escalateTitle">Emergency Services</h1>
-        <p class="lead">If you are in immediate danger or experiencing a crisis, use one of the options below.</p>
-      </header>
+<div class="ambient-bg">
+    <div class="glow" style="top: -5%; left: -5%;"></div>
+    <div class="glow" style="bottom: -5%; right: -5%;"></div>
+</div>
 
-      <div class="rows" role="list">
-        <div class="oval" role="button" tabindex="0" data-action="helpline" aria-label="Call mental health helpline">
-          <div class="icon-circle" aria-hidden="true">
-            <!-- head with heart -->
-            <svg class="icon" viewBox="0 0 24 24" xmlns="https://www.w3.org/2000/svg"><path d="M12 2c-2.8 0-5 2-5 5 0 3.9 5 7.6 5 7.6s5-3.7 5-7.6c0-3-2.2-5-5-5zm0 6.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
-          </div>
-          <div class="label">Mental Health Helpline</div>
-          <div class="sub">Confidential support 24/7</div>
+<div class="wrap">
+    <nav class="nav-header">
+        <a href="Dashboard.html" class="back-btn">Back</a>
+    </nav>
+
+    <header>
+        <h1>Emergency Services</h1>
+        <p>If you are in immediate danger or experiencing a crisis, please reach out now.</p>
+    </header>
+
+    <div class="grid">
+        <div class="action-card" onclick="handleAction('helpline')">
+            <div class="icon-box">
+                <svg viewBox="0 0 24 24"><path d="M12 2c-2.8 0-5 2-5 5 0 3.9 5 7.6 5 7.6s5-3.7 5-7.6c0-3-2.2-5-5-5zm0 6.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
+            </div>
+            <div class="label">Mental Health</div>
+            <div class="sub">Confidential support available 24/7</div>
         </div>
 
-        <div class="oval" role="button" tabindex="0" data-action="ambulance" aria-label="Call ambulance">
-          <div class="icon-circle" aria-hidden="true">
-            <!-- ambulance -->
-            <svg class="icon" viewBox="0 0 24 24" xmlns="https://www.w3.org/2000/svg"><path d="M3 11h13v6H3zM16 7h3v4h-3zM6 17a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm9 0a1.5 1.5 0 1 0 .001-3.001A1.5 1.5 0 0 0 15 17z"/></svg>
-          </div>
-          <div class="label">Ambulance</div>
-          <div class="sub">Emergency medical response</div>
+        <div class="action-card" onclick="handleAction('ambulance')">
+            <div class="icon-box">
+                <svg viewBox="0 0 24 24"><path d="M3 11h13v6H3zM16 7h3v4h-3zM6 17a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm9 0a1.5 1.5 0 1 0 .001-3.001A1.5 1.5 0 0 0 15 17z"/></svg>
+            </div>
+            <div class="label">Ambulance</div>
+            <div class="sub">Immediate medical response & rescue</div>
         </div>
 
-        <div class="oval" role="button" tabindex="0" data-action="contacts" aria-label="Open crisis contacts">
-          <div class="icon-circle" aria-hidden="true">
-            <!-- group -->
-            <svg class="icon" viewBox="0 0 24 24" xmlns="https://www.w3.org/2000/svg"><path d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zM8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zM8 13c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4zm8 0c-.3 0-.7 0-1 .1 1.1.9 1.7 1.9 1.7 3.4v1.5H23v-2c0-2.7-5.3-4-8-4z"/></svg>
-          </div>
-          <div class="label">Crisis Contacts</div>
-          <div class="sub">Local resources & support lines</div>
+        <div class="action-card" onclick="handleAction('contacts')">
+            <div class="icon-box">
+                <svg viewBox="0 0 24 24"><path d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zM8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zM8 13c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4zm8 0c-.3 0-.7 0-1 .1 1.1.9 1.7 1.9 1.7 3.4v1.5H23v-2c0-2.7-5.3-4-8-4z"/></svg>
+            </div>
+            <div class="label">Crisis Contacts</div>
+            <div class="sub">Browse local resources & support lines</div>
         </div>
-      </div>
-
-      <p class="note">If you're in immediate danger, click any of the related situations to call your local emergency number first.</p>
-
-      <div class="links" aria-hidden="false">
-       <button onclick="window.location.href='Dashboard.html'" 
-        class="btn-ghost" 
-        style="transition:0.2s; padding:8px 16px; border-radius:12px; font-size:14px;"
-        onmouseover="this.style.background='rgba(255,192,203,0.3)'; this.style.color='white';" 
-        onmouseout="this.style.background='transparent'; this.style.color='var(--muted)';">
-  Back
-</button>
-
-      </div>
-    </section>
-  </main>
-
-  <!-- modal -->
-  <div id="backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal" role="document" aria-labelledby="modalTitle">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h2 id="modalTitle">Crisis Contacts</h2>
-        <button class="close" id="closeModal" aria-label="Close">Close</button>
-      </div>
-
-      <div id="contactsList">
-        <!-- populated by JS -->
-      </div>
     </div>
-  </div>
 
+    <p class="footer-note">Your safety is the priority.</p>
+</div>
+
+<div id="backdrop" class="modal-backdrop" onclick="closeM()">
+    <div class="modal" onclick="event.stopPropagation()">
+        <h2>Crisis Contacts</h2>
+        <div id="contactsList"></div>
+        <button class="close-btn" onclick="closeM()">Close List</button>
+    </div>
+</div>
+
+<script src="theme-manager.js"></script>
 <script>
-  const contacts = [
-    { who: 'National Mental Health Helpline', phone: '1195', notes: '24/7 confidential support' },
-    { who: 'Ambulance / Emergency', phone: '+254 700395395', notes: 'Local emergency services' },
-    { who: 'Suicide Prevention Line', phone: '1195', notes: 'If you are considering self-harm' }
-  ];
+    const contacts = [
+        { who: 'Mental Health Helpline', phone: '1195', notes: '24/7 Support' },
+        { who: 'Ambulance / Emergency', phone: '911', notes: 'Emergency Services' },
+        { who: 'Suicide Prevention', phone: '1195', notes: 'Crisis Intervention' }
+    ];
 
-  const backdrop = document.getElementById('backdrop');
-  const contactsList = document.getElementById('contactsList');
-  const closeModal = document.getElementById('closeModal');
-
-  function openModal() {
-    contactsList.innerHTML = contacts.map(c => `
-      <div class="contact">
-        <div>
-          <div class="who">${c.who}</div>
-          <div style="font-size:13px;color:var(--muted)">${c.notes}</div>
-        </div>
-        <div>
-          <a href="tel:${c.phone.replace(/\s+/g,'')}" rel="noopener" aria-label="Call ${c.who}">${c.phone}</a>
-        </div>
-      </div>
-    `).join('');
-    backdrop.style.display = 'flex';
-    backdrop.setAttribute('aria-hidden','false');
-    closeModal.focus();
-  }
-
-  function close() {
-    backdrop.style.display = 'none';
-    backdrop.setAttribute('aria-hidden','true');
-  }
-
-  document.querySelectorAll('.oval').forEach(el => {
-    el.addEventListener('click', () => handleAction(el.dataset.action));
-    el.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleAction(el.dataset.action); }
-    });
-  });
-
-  function handleAction(action) {
-    switch(action){
-      case 'helpline':
-        // change number to local helpline as needed
-        window.location.href = 'tel:1195';
-        break;
-      case 'ambulance':
-        window.location.href = 'tel:+254 70039539';
-        break;
-      case 'contacts':
-        openModal();
-        break;
+    function handleAction(action) {
+        if(action === 'helpline') window.location.href = 'tel:1195';
+        if(action === 'ambulance') window.location.href = 'tel:911';
+        if(action === 'contacts') openM();
     }
-  }
 
-  closeModal.addEventListener('click', close);
-  backdrop.addEventListener('click', (e) => {
-    if (e.target === backdrop) close();
-  });
+    function openM() {
+        const list = document.getElementById('contactsList');
+        list.innerHTML = contacts.map(c => `
+            <div class="contact-item">
+                <div>
+                    <div class="who">${c.who}</div>
+                    <div class="note-txt">${c.notes}</div>
+                </div>
+                <a href="tel:${c.phone}" class="call-link">CALL</a>
+            </div>
+        `).join('');
+        document.getElementById('backdrop').style.display = 'flex';
+    }
 
-  // keyboard escape to close modal
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && backdrop.style.display === 'flex') close();
-  });
+    function closeM() { document.getElementById('backdrop').style.display = 'none'; }
+
+    if (typeof applyTheme === "function") {
+        applyTheme(localStorage.getItem('user-theme') || 'pink');
+    }
 </script>
 </body>
 </html>

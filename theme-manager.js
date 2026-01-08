@@ -26,46 +26,32 @@ const themes = {
     }
 };
 
-// --- CORE FUNCTIONS ---
-
-// Function to apply a selected theme
 function applyTheme(themeName) {
-    const theme = themes[themeName];
-    // Default to pink if the theme is invalid
-    if (!theme) {
-        applyTheme('pink');
-        return;
-    }
-
-    // Apply the CSS variables to the document root
-    for (const [key, value] of Object.entries(theme)) {
-        document.documentElement.style.setProperty(key, value);
-    }
+    const root = document.documentElement;
+    const theme = themes[themeName] || themes.pink;
     
-    // Save the theme choice for next page load
+    // Apply every variable in the object
+    Object.keys(theme).forEach(key => {
+        root.style.setProperty(key, theme[key]);
+    });
+
     localStorage.setItem('user-theme', themeName);
 }
 
-// Function to initialize theme on page load
-function initializeTheme() {
-    const savedTheme = localStorage.getItem('user-theme');
-    // Apply the saved theme, or default to 'pink'
-    applyTheme(savedTheme || 'pink');
-}
+// 1. Initialize immediately
+applyTheme(localStorage.getItem('user-theme') || 'pink');
 
-// Automatically run the initialization when this script loads
-initializeTheme();
+// 2. Listen for changes in other tabs/windows
+window.addEventListener('storage', (e) => {
+    if (e.key === 'user-theme') applyTheme(e.newValue);
+});
 
-// disable-rightclick.js
-document.addEventListener('contextmenu', function(e) {
-  e.preventDefault();
-  alert('Right-click is disabled on this app!');
-});
-document.addEventListener('keydown', e => {
-  // F12
-  if (e.key === 'F12') e.preventDefault();
-  // Ctrl+Shift+I / Cmd+Option+I (DevTools)
-  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'i') e.preventDefault();
-  // Ctrl+U (View source)
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'u') e.preventDefault();
-});
+// 3. Security (Cleaned up)
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.onkeydown = function(e) {
+    if (e.keyCode == 123) return false; // F12
+    if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
+    if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
+    if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
+    if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+};
