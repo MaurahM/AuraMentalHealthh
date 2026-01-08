@@ -1,10 +1,12 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const Chat = require('../models/Chat');
+const { GoogleGenAI } = require('@google/genai');
+const Chat = require('../models/Chat'); // Your Mongoose Chat Model (path must be correct)
 
-// Initialize Gemini with the API Key from Railway Environment Variables
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Initialize the Gemini AI client
+// It automatically looks for the GEMINI_API_KEY environment variable in .env
+const ai = new GoogleGenAI({}); 
 
-// --- Aura's System Instruction ---
+// --- Configuration for the AI Chat Model ---
+// This system instruction sets the AI's role and tone
 const systemInstruction = `
 ────────────
 AURA SYSTEM PROMPT (REVISED)
@@ -200,119 +202,138 @@ Reassure users that they are not alone and that their feelings are valid. You ar
 ────────────
 `;
 
-// @desc Send a message and get a reply based on history
+
+// @desc Send a message to the AI and save the conversation
 // @route POST /api/chat/message
 exports.sendMessage = async (req, res) => {
-    const userId = req.user._id;
-    let { message } = req.body;
+    // req.user is guaranteed to be set by the 'protect' middleware
+    const userId = req.user._id; 
+    let { message } = req.body; 
 
-    // 1. Validate Input
-    message = message ? String(message).trim() : '';
-    if (message.length === 0) {
-        return res.status(400).json({ message: 'Message content cannot be empty.' });
-    }
+    // 1. Pre-process and validate the incoming message
+    // CRITICAL FIX: Ensure the message is a clean, trimmed string
+    message = message ? String(message).trim() : ''; 
+    
+    if (message.length === 0) {
+        return res.status(400).json({ message: 'Message content cannot be empty.' });
+    }
 
-    try {
-        // 2. Find or create the user's chat history
-        let chatDocument = await Chat.findOne({ user: userId });
-        if (!chatDocument) {
-            chatDocument = await Chat.create({ user: userId, messages: [] });
-        }
+    try {
+        // 2. Find o
+        // r create the user's chat history document
+        let chatDocument = await Chat.findOne({ user: userId });
 
-        // 3. Format history for Gemini (Mapping 'ai' to 'model')
-        const historyForGemini = chatDocument.messages.map(msg => ({
-            role: msg.sender === 'user' ? 'user' : 'model',
-            parts: [{ text: msg.text }]
-        }));
+        if (!chatDocument) {
+            chatDocument = await Chat.create({ user: userId, messages: [] });
+        }
 
-        // 4. Initialize Model
-        // Using "gemini-pro" for maximum stability across versions
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        // 3. Add the user's message to the history (for persistence)
+        const userMessage = { sender: 'user', text: message, timestamp: new Date() };
+        chatDocument.messages.push(userMessage);
 
-        // 5. Start Chat Session
-        // We inject the system instruction here to ensure Aura follows her rules
-        const chatSession = model.startChat({
-            history: [
-                {
-                    role: "user",
-                    parts: [{ text: `INSTRUCTIONS: ${systemInstruction}` }],
-                },
-                {
-                    role: "model",
-                    parts: [{ text: "Understood. I am Aura, your well-being companion. I will follow these instructions and provide support." }],
-                },
-                ...historyForGemini
-            ],
-            generationConfig: {
-                maxOutputTokens: 800,
-                temperature: 0.7,
-            },
-        });
+        // --- CORE FIX: Constructing the Gemini API Payload ---
 
-        // 6. Generate Response
-        const result = await chatSession.sendMessage(message);
-        const response = await result.response;
-        const aiResponseText = response.text();
+        // 4. Construct clean history from existing messages (excluding the new one)
+        const cleanExistingHistory = chatDocument.messages
+            // We use .slice(0, -1) to get all messages EXCEPT the one we just pushed
+            .slice(0, -1) 
+            // Filter the old messages to ensure clean context
+            .filter(msg => msg.content && String(msg.content).trim().length > 0)
+            .map(msg => ({
+                role: msg.role === 'user' ? 'user' : 'model',
+                parts: [{ text: String(msg.content) }]
+            }));
+        
+        // 5. Create the current message part (which is guaranteed to be valid)
+        const currentMessagePart = {
+            role: 'user',
+            parts: [{ text: message }] 
+        };
+        
+        // 6. Combine existing clean history and the current user message
+        // This guarantees the 'contents' array will not be empty.
+        const historyForGemini = [...cleanExistingHistory, currentMessagePart];
+        
+        // 7. Call Gemini API
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash", 
+            contents: historyForGemini, 
+            config: {
+                systemInstruction: systemInstruction,
+            },
+        });
 
-        // 7. Persist messages to Database
-        chatDocument.messages.push({
-            sender: 'user',
-            text: message,
-            timestamp: new Date()
-        });
+        const aiResponseText = response.text;
 
-        const aiMessage = {
-            sender: 'ai',
-            text: aiResponseText,
-            timestamp: new Date()
-        };
-        chatDocument.messages.push(aiMessage);
+        // 8. Add the AI's response to the history
+        const aiMessage = { sender: 'model', text: aiResponseText, timestamp: new Date() };
+        chatDocument.messages.push(aiMessage);
 
-        await chatDocument.save();
+        // 9. Save the updated history to the database
+        await chatDocument.save();
 
-        // 8. Return Response to Frontend
-        res.json({
-            response: aiResponseText,
-            timestamp: aiMessage.timestamp
-        });
+        // 10. Send the AI's response back to the frontend
+        res.json({
+            response: aiResponseText,
+            timestamp: aiMessage.timestamp
+        });
 
-    } catch (error) {
-        console.error('Gemini Chat Error:', error);
-        
-        // Handle specific 404/API errors gracefully
-        if (error.message.includes('404')) {
-            return res.status(500).json({ 
-                message: 'Aura is having trouble reaching her memory banks. Please check API settings.' 
-            });
-        }
-        
-        res.status(500).json({ message: 'Aura is having trouble connecting. Please try again later.' });
-    }
+    } catch (error) {
+        console.error('Gemini API/Chat Error:', error);
+        
+        // Log the exact error to the terminal but send a generic error to the client
+        res.status(500).json({ message: 'An unexpected server error occurred while processing the chat.' });
+    }
 };
 
-// @desc Get the full chat history
+// -----------------------------------------------------------------------------------
+
+// @desc Get the full chat history for the logged-in user
+// @route GET /api/chat/history
 exports.getHistory = async (req, res) => {
-    const userId = req.user._id;
-    try {
-        const chatDocument = await Chat.findOne({ user: userId }).select('messages');
-        if (!chatDocument) {
-            return res.status(200).json({ messages: [] });
-        }
-        res.json({ messages: chatDocument.messages });
-    } catch (error) {
-        console.error('Fetch History Error:', error);
-        res.status(500).json({ message: 'Failed to retrieve chat history.' });
-    }
+    // req.user is guaranteed to be set by the 'protect' middleware
+    const userId = req.user._id;
+
+    try {
+        // Find the chat document and only return the messages array
+        const chatDocument = await Chat.findOne({ user: userId }).select('messages');
+
+        // If no document exists, return an empty array
+        if (!chatDocument) {
+            return res.status(200).json({ messages: [] });
+        }
+
+        // Return the messages array
+        res.json({ messages: chatDocument.messages });
+        
+    } catch (error) {
+        console.error('Fetch History Error:', error);
+        res.status(500).json({ message: 'Failed to retrieve chat history.' });
+    }
 };
 
-// @desc Clear all chat messages
-exports.clearHistory = async (req, res) => {
-    const userId = req.user._id;
-    try {
-        await Chat.findOneAndUpdate({ user: userId }, { $set: { messages: [] } });
-        res.status(204).send();
-    } catch (error) {
-        console.error("Error clearing chat history:", error);
-        res.status(500).json({ message: 'Failed to clear history.' });
-    }
+const clearHistory = async (req, res) => {
+    // 1. CORRECTION: Use req.user._id for the user ID
+    const userId = req.user._id; 
+
+    try {
+        // 2. CORRECTION: Use the imported 'Chat' model 
+        // 3. CORRECTION: Query by the 'user' field in the schema
+        await Chat.deleteMany({ user: userId }); 
+
+        // Send a 204 response (No Content) for successful deletion
+        res.status(204).send(); 
+
+    } catch (error) {
+        console.error("Error clearing chat history:", error);
+        res.status(500).json({ message: 'Failed to clear history on server.' });
+    }
+};
+
+module.exports = {
+    sendMessage: exports.sendMessage, 
+    getHistory: exports.getHistory,
+    
+    // 4. CORRECTION: Must export clearHistory
+    clearHistory, 
 };
