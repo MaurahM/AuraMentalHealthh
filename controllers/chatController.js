@@ -1,8 +1,7 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Chat = require('../models/Chat');
 
-// Initialize Gemini
-// Ensure GEMINI_API_KEY is in your .env file
+// Initialize Gemini with the API Key from Railway Environment Variables
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // --- Aura's System Instruction ---
@@ -207,49 +206,55 @@ exports.sendMessage = async (req, res) => {
     const userId = req.user._id;
     let { message } = req.body;
 
+    // 1. Validate Input
     message = message ? String(message).trim() : '';
     if (message.length === 0) {
         return res.status(400).json({ message: 'Message content cannot be empty.' });
     }
 
     try {
+        // 2. Find or create the user's chat history
         let chatDocument = await Chat.findOne({ user: userId });
         if (!chatDocument) {
             chatDocument = await Chat.create({ user: userId, messages: [] });
         }
 
-        // FIX 1: Gemini strictly requires 'user' and 'model'. 
-        // We ensure any 'ai' sender is mapped to 'model' for the API history.
+        // 3. Format history for Gemini (Mapping 'ai' to 'model')
         const historyForGemini = chatDocument.messages.map(msg => ({
             role: msg.sender === 'user' ? 'user' : 'model',
             parts: [{ text: msg.text }]
         }));
 
-        // FIX 2: Use 'gemini-1.5-flash' as the string. 
-        // If you still get a 404, change this to "gemini-pro" as a fallback.
-        const model = genAI.getGenerativeModel({ 
-    model: "gemini-pro",
-    systemInstruction: systemInstruction 
-});
+        // 4. Initialize Model
+        // Using "gemini-pro" for maximum stability across versions
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-        // FIX 3: Start Chat Session
-        // Note: In newer SDKs, systemInstruction is passed in getGenerativeModel above.
-        // If Aura isn't following instructions, we can also prepend it to history.
+        // 5. Start Chat Session
+        // We inject the system instruction here to ensure Aura follows her rules
         const chatSession = model.startChat({
-            history: historyForGemini,
+            history: [
+                {
+                    role: "user",
+                    parts: [{ text: `INSTRUCTIONS: ${systemInstruction}` }],
+                },
+                {
+                    role: "model",
+                    parts: [{ text: "Understood. I am Aura, your well-being companion. I will follow these instructions and provide support." }],
+                },
+                ...historyForGemini
+            ],
             generationConfig: {
                 maxOutputTokens: 800,
                 temperature: 0.7,
             },
         });
 
-        // Generate Response
+        // 6. Generate Response
         const result = await chatSession.sendMessage(message);
         const response = await result.response;
         const aiResponseText = response.text();
 
-        // 7. Persist to Database
-        // We save the user message BEFORE the AI message to keep chronological order
+        // 7. Persist messages to Database
         chatDocument.messages.push({
             sender: 'user',
             text: message,
@@ -265,6 +270,7 @@ exports.sendMessage = async (req, res) => {
 
         await chatDocument.save();
 
+        // 8. Return Response to Frontend
         res.json({
             response: aiResponseText,
             timestamp: aiMessage.timestamp
@@ -273,10 +279,10 @@ exports.sendMessage = async (req, res) => {
     } catch (error) {
         console.error('Gemini Chat Error:', error);
         
-        // Detailed error for debugging
+        // Handle specific 404/API errors gracefully
         if (error.message.includes('404')) {
             return res.status(500).json({ 
-                message: 'Aura is having trouble connecting to the AI service. Please check model name configuration.' 
+                message: 'Aura is having trouble reaching her memory banks. Please check API settings.' 
             });
         }
         
@@ -285,7 +291,6 @@ exports.sendMessage = async (req, res) => {
 };
 
 // @desc Get the full chat history
-// @route GET /api/chat/history
 exports.getHistory = async (req, res) => {
     const userId = req.user._id;
     try {
@@ -301,15 +306,13 @@ exports.getHistory = async (req, res) => {
 };
 
 // @desc Clear all chat messages
-// @route DELETE /api/chat/clear
 exports.clearHistory = async (req, res) => {
     const userId = req.user._id;
     try {
-        // Instead of deleting the whole doc, we empty the messages array
         await Chat.findOneAndUpdate({ user: userId }, { $set: { messages: [] } });
         res.status(204).send();
     } catch (error) {
         console.error("Error clearing chat history:", error);
-        res.status(500).json({ message: 'Failed to clear history on server.' });
+        res.status(500).json({ message: 'Failed to clear history.' });
     }
 };
