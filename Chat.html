@@ -21,13 +21,15 @@
   .title{font-weight:700;letter-spacing:0.6px}
   .chat-area{background:transparent;border-radius:8px;flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:360px}
   .messages{flex:1;overflow:auto;padding:22px 18px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
-  .msg{max-width:72%;padding:12px 16px;border-radius:20px;box-sizing:border-box;line-height:1.2;word-wrap:break-word}
+  .msg{max-width:72%;padding:12px 16px;border-radius:20px;box-sizing:border-box;line-height:1.2;word-wrap:break-word; animation: fadeIn 0.3s ease;}
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
   .left{align-self:flex-start;background:var(--bubble-left);color:#333;border-bottom-left-radius:6px}
   .right{align-self:flex-end;background:var(--bubble-right);color:#fff;border-bottom-right-radius:6px}
   .meta{font-size:12px;color:var(--muted);margin-bottom:6px}
   .composer{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(255,255,255,0.03);align-items:center;justify-content:space-between}
   .input{flex:1;background:rgba(0,0,0,0.15);border-radius:999px;padding:12px 14px;border:0;color:var(--white);outline:none;resize:none;min-height:44px;max-height:120px;margin:0 8px;}
-  .btn{background:linear-gradient(90deg,var(--pink),#ff5aa8);border:0;color:#fff;padding:10px 12px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+  .btn{background:linear-gradient(90deg,var(--pink),#ff5aa8);border:0;color:#fff;padding:10px 12px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition: transform 0.2s;}
+  .btn:active{transform: scale(0.9);}
   .btn-clear{
     background: rgba(255,255,255,0.1);
     color: var(--pink);
@@ -35,52 +37,37 @@
     padding: 10px 12px;
     border-radius: 999px;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     font-weight: 500;
   }
-  .btn-clear:hover{
-    background: rgba(255,47,166,0.1);
-  }
   .hint{font-size:13px;color:var(--muted);text-align:center;margin-top:6px}
-  @media (max-width:760px){
-    .panel{padding:16px}
-    .messages{padding:16px}
-    .msg{max-width:86%}
-  }
+  .btn-ghost{color: #ffadad; text-decoration: none; font-size: 14px; text-align: center; display: block; margin-top: 10px;}
+  @media (max-width:760px){ .panel{padding:16px} .msg{max-width:86%} }
 </style>
-<script src="theme-manager.js"></script>
 </head>
 
 <body>
 <script>
-    // --- 🔑 AUTHENTICATION GUARD SCRIPT ---
     const TOKEN_KEY = 'convai_user_token';
     const token = localStorage.getItem(TOKEN_KEY);
-    if (!token) {
-        window.location.href = 'index.html';
-    }
+    if (!token) { window.location.href = 'index.html'; }
 </script>
 
-<main class="wrap" role="main" aria-labelledby="chatTitle">
-    <section class="panel" aria-labelledby="chatTitle">
+<main class="wrap">
+    <section class="panel">
       <div class="header">
-        <div class="title" id="chatTitle">Chat with Aura</div>
-        <div style="font-size:13px;color:var(--muted)">
-          <a href="Dashboard.html" style="color:var(--pink);text-decoration:none">Back</a>
-        </div>
+        <div class="title">Chat with Aura 💗</div>
+        <div style="font-size:13px;"><a href="Dashboard.html" style="color:var(--pink);text-decoration:none">Back</a></div>
       </div>
 
-      <div class="chat-area" role="application" aria-live="polite" aria-atomic="false">
-        <div id="messages" class="messages" role="list" aria-label="Messages">
-            </div>
+      <div class="chat-area">
+        <div id="messages" class="messages">
+          </div>
 
-        <div class="composer" role="region" aria-label="Message composer">
-          <button id="clear" class="btn-clear" aria-label="Clear chat" title="Clear Chat">Clear</button>
-          <textarea id="input" class="input" placeholder="Type something..." rows="1" aria-label="Message"></textarea>
-          <button id="send" class="btn" aria-label="Send message" title="Send">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="https://www.w3.org/2000/svg" aria-hidden="true">
+        <div class="composer">
+          <button id="clear" class="btn-clear">Clear</button>
+          <textarea id="input" class="input" placeholder="Type something..." rows="1"></textarea>
+          <button id="send" class="btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" fill="#fff"/>
             </svg>
           </button>
@@ -88,7 +75,7 @@
       </div>
 
       <div class="hint">Press Enter to send / Shift+Enter for new line</div>
-      <a class="btn-ghost" style="color: #ffadad; text-align: center; text-decoration: none; display: block; margin-top: 10px;" href="Escalation.html">Emergency Services</a>
+      <a class="btn-ghost" href="Escalation.html">Emergency Services</a>
     </section>
 </main>
 
@@ -99,25 +86,17 @@
     const sendBtn = document.getElementById("send");
     const clearBtn = document.getElementById("clear");
 
-    // FIXED: Using 'convai_user_token' to match your login/guard script
     const token = localStorage.getItem('convai_user_token');
-
     const BASE_API_URL = "https://auramentalhealthh-production.up.railway.app/api/chat";
+    
     const getHeaders = () => ({
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
     });
 
-    function escapeHtml(s = "") {
-        return String(s).replace(/[&<>"']/g, (c) => ({
-            "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-        })[c]);
-    }
-
     function appendMessage(text, side = "right", who = "") {
         const wrap = document.createElement("div");
         wrap.className = `msg ${side}`;
-        wrap.setAttribute("role", "listitem");
         if (who) {
             const meta = document.createElement("div");
             meta.className = "meta";
@@ -125,85 +104,63 @@
             wrap.appendChild(meta);
         }
         const textNode = document.createElement("div");
-        textNode.innerHTML = escapeHtml(text).replace(/\n/g, "<br>");
+        textNode.style.whiteSpace = "pre-wrap";
+        textNode.textContent = text;
         wrap.appendChild(textNode);
         messagesEl.appendChild(wrap);
         messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    function showTyping() {
-        const node = document.createElement("div");
-        node.className = "msg left typing";
-        const meta = document.createElement("div");
-        meta.className = "meta";
-        meta.textContent = "Aura 💗";
-        const dots = document.createElement("div");
-        dots.innerHTML = "&#8230;";
-        node.appendChild(meta);
-        node.appendChild(dots);
-        messagesEl.appendChild(node);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-        return node;
-    }
-
-    // FIXED: This function now clears the initial screen and loads database messages
     async function loadChatHistory() {
         try {
-            const res = await fetch(`${BASE_API_URL}/history`, {
-                method: 'GET',
-                headers: getHeaders()
-            });
+            const res = await fetch(`${BASE_API_URL}/history`, { method: 'GET', headers: getHeaders() });
             if (res.ok) {
                 const data = await res.json();
-                messagesEl.innerHTML = ""; // Wipe "Assistant..." message if history is found
+                messagesEl.innerHTML = ""; 
                 if (data.messages && data.messages.length > 0) {
                     data.messages.forEach(msg => {
                         appendMessage(msg.text, msg.sender === 'user' ? 'right' : 'left', msg.sender === 'user' ? 'You' : 'Aura 💗');
                     });
                 } else {
-                    appendMessage("Hello Love, I'm here to listen. How are you feeling today?", "left", "Aura 💗");
+                    appendMessage("Hello Love, I'm Aura. I'm here to listen.", "left", "Aura 💗");
                 }
             }
-        } catch (err) { console.error('Failed to load history:', err); }
+        } catch (err) { console.error('History failed:', err); }
     }
 
     async function send() {
-        const raw = inputEl.value.trim();
-        if (!raw || sendBtn.disabled) return;
+        const message = inputEl.value.trim();
+        if (!message || sendBtn.disabled) return;
 
-        appendMessage(raw, "right", "You");
+        appendMessage(message, "right", "You");
         inputEl.value = "";
         inputEl.style.height = "auto";
         sendBtn.disabled = true;
-        const typingNode = showTyping();
 
         try {
             const res = await fetch(`${BASE_API_URL}/message`, {
                 method: "POST",
                 headers: getHeaders(),
-                body: JSON.stringify({ message: raw })
+                body: JSON.stringify({ message })
             });
+
+            if (!res.ok) throw new Error();
+
             const data = await res.json();
-            typingNode.remove();
-            if (res.ok) {
-                appendMessage(data.response, "left", "Aura 💗");
-            } else {
-                appendMessage("I couldn't reach the server. Please try again.", "left", "Aura 💗");
-            }
+            appendMessage(data.response, "left", "Aura 💗");
         } catch (err) {
-            if (typingNode) typingNode.remove();
-            appendMessage("Check your connection.", "left", "Aura 💗");
+            appendMessage("I'm feeling a bit overwhelmed. Could you try sending that again?", "left", "Aura 💗");
         } finally {
             sendBtn.disabled = false;
         }
     }
 
     clearBtn.addEventListener("click", async () => {
-        if (!confirm("Clear all messages?")) return;
+        if (!confirm("Clear our history?")) return;
         try {
             await fetch(`${BASE_API_URL}/history`, { method: "DELETE", headers: getHeaders() });
             messagesEl.innerHTML = "";
-            appendMessage("History cleared. How can I help now?", "left", "Aura 💗");
+            appendMessage("I'm ready to start fresh. How are you?", "left", "Aura 💗");
         } catch (err) { console.error(err); }
     });
 
@@ -211,12 +168,6 @@
         if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
     });
     sendBtn.addEventListener("click", send);
-
-    inputEl.addEventListener("input", () => {
-        inputEl.style.height = "auto";
-        inputEl.style.height = Math.min(inputEl.scrollHeight, 140) + "px";
-    });
-
     loadChatHistory();
 })();
 </script>
