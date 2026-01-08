@@ -54,16 +54,16 @@
 </head>
 
 <body>
-  <script>
-    // Guard script using YOUR specific key
+<script>
+    // --- 🔑 AUTHENTICATION GUARD SCRIPT ---
     const TOKEN_KEY = 'convai_user_token';
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) {
         window.location.href = 'index.html';
     }
-  </script>
- 
-  <main class="wrap" role="main" aria-labelledby="chatTitle">
+</script>
+
+<main class="wrap" role="main" aria-labelledby="chatTitle">
     <section class="panel" aria-labelledby="chatTitle">
       <div class="header">
         <div class="title" id="chatTitle">Chat with Aura</div>
@@ -74,11 +74,7 @@
 
       <div class="chat-area" role="application" aria-live="polite" aria-atomic="false">
         <div id="messages" class="messages" role="list" aria-label="Messages">
-          <div class="msg left" role="listitem">
-            <div class="meta">Aura 💗</div>
-            Hello Love, I'm here to listen. How are you feeling today?
-          </div>
-        </div>
+            </div>
 
         <div class="composer" role="region" aria-label="Message composer">
           <button id="clear" class="btn-clear" aria-label="Clear chat" title="Clear Chat">Clear</button>
@@ -94,7 +90,7 @@
       <div class="hint">Press Enter to send / Shift+Enter for new line</div>
       <a class="btn-ghost" style="color: #ffadad; text-align: center; text-decoration: none; display: block; margin-top: 10px;" href="Escalation.html">Emergency Services</a>
     </section>
-  </main>
+</main>
 
 <script>
 (function () {
@@ -103,7 +99,7 @@
     const sendBtn = document.getElementById("send");
     const clearBtn = document.getElementById("clear");
 
-    // FIX: Using your exact token key from the guard script
+    // FIXED: Using 'convai_user_token' to match your login/guard script
     const token = localStorage.getItem('convai_user_token');
 
     const BASE_API_URL = "https://auramentalhealthh-production.up.railway.app/api/chat";
@@ -121,6 +117,7 @@
     function appendMessage(text, side = "right", who = "") {
         const wrap = document.createElement("div");
         wrap.className = `msg ${side}`;
+        wrap.setAttribute("role", "listitem");
         if (who) {
             const meta = document.createElement("div");
             meta.className = "meta";
@@ -149,7 +146,7 @@
         return node;
     }
 
-    // FIX: This function now pulls your real history on refresh
+    // FIXED: This function now clears the initial screen and loads database messages
     async function loadChatHistory() {
         try {
             const res = await fetch(`${BASE_API_URL}/history`, {
@@ -158,14 +155,16 @@
             });
             if (res.ok) {
                 const data = await res.json();
+                messagesEl.innerHTML = ""; // Wipe "Assistant..." message if history is found
                 if (data.messages && data.messages.length > 0) {
-                    messagesEl.innerHTML = ""; // Wipe the default welcome if history exists
                     data.messages.forEach(msg => {
                         appendMessage(msg.text, msg.sender === 'user' ? 'right' : 'left', msg.sender === 'user' ? 'You' : 'Aura 💗');
                     });
+                } else {
+                    appendMessage("Hello Love, I'm here to listen. How are you feeling today?", "left", "Aura 💗");
                 }
             }
-        } catch (err) { console.error('History failed:', err); }
+        } catch (err) { console.error('Failed to load history:', err); }
     }
 
     async function send() {
@@ -182,30 +181,29 @@
             const res = await fetch(`${BASE_API_URL}/message`, {
                 method: "POST",
                 headers: getHeaders(),
-                body: JSON.stringify({ message: raw }),
+                body: JSON.stringify({ message: raw })
             });
             const data = await res.json();
             typingNode.remove();
             if (res.ok) {
                 appendMessage(data.response, "left", "Aura 💗");
             } else {
-                appendMessage("I'm a bit overwhelmed. Try again?", "left", "Aura 💗");
+                appendMessage("I couldn't reach the server. Please try again.", "left", "Aura 💗");
             }
         } catch (err) {
             if (typingNode) typingNode.remove();
             appendMessage("Check your connection.", "left", "Aura 💗");
         } finally {
             sendBtn.disabled = false;
-            inputEl.focus();
         }
     }
 
     clearBtn.addEventListener("click", async () => {
-        if (!confirm("Clear chat?")) return;
+        if (!confirm("Clear all messages?")) return;
         try {
             await fetch(`${BASE_API_URL}/history`, { method: "DELETE", headers: getHeaders() });
             messagesEl.innerHTML = "";
-            appendMessage("How are you feeling now?", "left", "Aura 💗");
+            appendMessage("History cleared. How can I help now?", "left", "Aura 💗");
         } catch (err) { console.error(err); }
     });
 
@@ -213,6 +211,12 @@
         if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
     });
     sendBtn.addEventListener("click", send);
+
+    inputEl.addEventListener("input", () => {
+        inputEl.style.height = "auto";
+        inputEl.style.height = Math.min(inputEl.scrollHeight, 140) + "px";
+    });
+
     loadChatHistory();
 })();
 </script>
