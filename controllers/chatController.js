@@ -228,8 +228,9 @@ exports.sendMessage = async (req, res) => {
         // FIX 2: Use 'gemini-1.5-flash' as the string. 
         // If you still get a 404, change this to "gemini-pro" as a fallback.
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-flash" 
-        });
+    model: "gemini-1.5-flash",
+    systemInstruction: systemInstruction 
+});
 
         // FIX 3: Start Chat Session
         // Note: In newer SDKs, systemInstruction is passed in getGenerativeModel above.
