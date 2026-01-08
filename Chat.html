@@ -118,7 +118,7 @@
 
     // --- 🔑 AUTHENTICATION GUARD SCRIPT (MUST RUN FIRST) ---
 
-    const TOKEN_KEY = 'convai_user_token';
+    const TOKEN_KEY = 'userToken';
 
     const token = localStorage.getItem(TOKEN_KEY);
 
@@ -327,10 +327,9 @@
         try {
 
             const res = await fetch(`${BASE_API_URL}/history`, {
-
-                method: 'GET',
-
-                headers: getHeaders('text/plain')
+            method: 'GET',
+            // --- FIX 2: Removed 'text/plain' which can confuse Express ---
+            headers: getHeaders()
 
             });
 
