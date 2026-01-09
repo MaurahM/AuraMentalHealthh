@@ -6,18 +6,16 @@ const dns = require('dns');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
-// 1. Set up the Email Transporter
-// Ensure EMAIL_USER and EMAIL_PASS are set in Railway Variables
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
-    secure: true, // Use SSL/TLS
+    secure: true, 
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     },
     tls: {
-        rejectUnauthorized: false // Helps prevent connection blocks
+        rejectUnauthorized: false 
     }
 });
 
@@ -38,19 +36,34 @@ const checkEmailDomain = (email) => {
     });
 };
 
-// @route   POST /api/auth/signup
 exports.registerUser = async (req, res) => {
     const { username, email, password } = req.body;
 
-    // ... (Keep your validation and DNS check code here) ...
+    // 1. Validation
+    if (!username || !email || !password) {
+        return res.status(400).json({ message: 'Please enter all fields' });
+    }
 
     try {
-        // ... (Keep your bcrypt hashing code here) ...
+        // 2. Domain Check
+        const isDomainValid = await checkEmailDomain(email);
+        if (!isDomainValid) {
+            return res.status(400).json({ message: 'The provided email domain is invalid.' });
+        }
 
+        // 3. Check if user already exists
+        const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Username or Email already exists' });
+        }
+
+        // 4. Hash Password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
         const vToken = crypto.randomBytes(32).toString('hex');
 
-        // --- PASTE THE NEW CODE STARTING HERE ---
-        user = await User.create({
+        // 5. Create User
+        const user = await User.create({
             username,
             email,
             password: hashedPassword,
@@ -60,6 +73,7 @@ exports.registerUser = async (req, res) => {
 
         await Chat.create({ user: user._id, messages: [] });
 
+        // 6. Send Email
         try {
             const verifyUrl = `https://auramentalhealthh-production.up.railway.app/api/user/verify/${vToken}`;
             
@@ -67,7 +81,7 @@ exports.registerUser = async (req, res) => {
                 from: `"Aura Support" <${process.env.EMAIL_USER}>`, 
                 to: email,
                 subject: "Verify your Aura Account",
-                html: `<h2>Welcome to Aura, ${username}!</h2><p>Click below to verify:</p><a href="${verifyUrl}">Verify Now</a>`
+                html: `<h2>Welcome to Aura, ${username}!</h2><p>Click below to verify your account:</p><a href="${verifyUrl}" style="background:#ff2fa6; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;">Verify Now</a>`
             });
 
             return res.status(201).json({
@@ -77,10 +91,9 @@ exports.registerUser = async (req, res) => {
         } catch (emailError) {
             console.error('Email failed to send:', emailError);
             return res.status(201).json({
-                message: 'Account created, but we had trouble sending the verification email. Please check your spam or contact support.'
+                message: 'Account created, but we had trouble sending the verification email. Check spam or contact support.'
             });
         }
-        // --- PASTE ENDS HERE ---
 
     } catch (error) {
         console.error('Signup Error:', error);
@@ -88,24 +101,17 @@ exports.registerUser = async (req, res) => {
     }
 };
 
-// @route   POST /api/auth/login
 exports.loginUser = async (req, res) => {
     const { email, password } = req.body;
-
     try {
         const user = await User.findOne({ email });
+        if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-
-        // CHECK VERIFICATION STATUS
         if (!user.isVerified) {
-            return res.status(403).json({ message: 'Please verify your email before logging in. Check your inbox!' });
+            return res.status(403).json({ message: 'Please verify your email before logging in.' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
-        
         if (isMatch) {
             res.json({
                 _id: user._id,
@@ -123,13 +129,10 @@ exports.loginUser = async (req, res) => {
     }
 };
 
-// @route   GET /api/auth/status
 exports.checkStatus = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('isPaid');
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
+        if (!user) return res.status(404).json({ message: 'User not found' });
         res.json({ isPaid: user.isPaid });
     } catch (error) {
         res.status(500).json({ message: 'Server error checking status' });
