@@ -411,16 +411,15 @@ Previous chat code (frontend)
 
 COMMIT CODE 
 
-# 1. Check which files were modified
+
 git status
 
-# 2. Stage all changed files (Dashboard, Journal, Escalation, etc.)
+
 git add .
 
-# 3. Commit the changes with a descriptive message
-git commit -m "UI: Standardized font scaling, fixed dashboard emojis, and updated glassmorphism"
 
-# 4. Push the changes to your main branch (usually 'main' or 'master')
+git commit -m "my changes"
+
 git push origin main
 
 
