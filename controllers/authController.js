@@ -3,10 +3,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Chat = require('../models/Chat'); 
 const dns = require('dns');
-const crypto = require('crypto'); // NEW: For generating tokens
-const nodemailer = require('nodemailer'); // NEW: For sending emails
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
-// NEW: Set up the Email Transporter
+// 1. Set up the Email Transporter
+// Ensure EMAIL_USER and EMAIL_PASS are set in Railway Variables
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -32,6 +33,7 @@ const checkEmailDomain = (email) => {
     });
 };
 
+// @route   POST /api/auth/signup
 exports.registerUser = async (req, res) => {
     const { username, email, password } = req.body;
 
@@ -40,43 +42,56 @@ exports.registerUser = async (req, res) => {
     }
 
     try {
+        // DNS Validation
         const isDomainValid = await checkEmailDomain(email);
         if (!isDomainValid) {
-            return res.status(400).json({ message: 'Invalid email domain.' });
+            return res.status(400).json({ message: 'The provided email domain is invalid.' });
         }
 
+        // Check if user exists
         let user = await User.findOne({ email });
         if (user) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
+        // Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // NEW: Create a unique verification token
+        // Create unique token for email verification
         const vToken = crypto.randomBytes(32).toString('hex');
 
+        // Create new user (isVerified defaults to false)
         user = await User.create({
             username,
             email,
             password: hashedPassword,
-            verificationToken: vToken, // NEW: Save to DB
-            isVerified: false          // NEW: Default to false
+            verificationToken: vToken,
+            isVerified: false 
         });
 
+        // Create initial chat document
         await Chat.create({ user: user._id, messages: [] });
 
-        // NEW: Send the Verification Email
-        // Change 'your-site.com' to your actual Railway frontend URL
+        // Generate Verification Link 
+        // Note: Using /api/user to match app.use('/api/user', userRoutes) in server.js
         const verifyUrl = `https://auramentalhealthh-production.up.railway.app/api/user/verify/${vToken}`;
 
+        // Send Email
         await transporter.sendMail({
             from: '"Aura Support" <info.auraafrica@gmail.com>',
             to: email,
             subject: "Verify your Aura Account",
-            html: `<h2>Welcome to Aura, ${username}!</h2>
-                   <p>Please click the button below to verify your account:</p>
-                   <a href="${verifyUrl}" style="background:#ff2fa6; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;">Verify Now</a>`
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px;">
+                    <h2 style="color: #ff2fa6; text-align: center;">Welcome to Aura, ${username}!</h2>
+                    <p>Thank you for joining our community. To get started, please confirm your email address by clicking the button below:</p>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${verifyUrl}" style="background-color: #ff2fa6; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Verify My Account</a>
+                    </div>
+                    <p style="font-size: 0.8em; color: #777;">If you did not create this account, you can safely ignore this email.</p>
+                </div>
+            `
         });
 
         res.status(201).json({
@@ -89,6 +104,7 @@ exports.registerUser = async (req, res) => {
     }
 };
 
+// @route   POST /api/auth/login
 exports.loginUser = async (req, res) => {
     const { email, password } = req.body;
 
@@ -99,9 +115,9 @@ exports.loginUser = async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // NEW: Block login if not verified
+        // CHECK VERIFICATION STATUS
         if (!user.isVerified) {
-            return res.status(403).json({ message: 'Please verify your email before logging in.' });
+            return res.status(403).json({ message: 'Please verify your email before logging in. Check your inbox!' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
@@ -123,6 +139,7 @@ exports.loginUser = async (req, res) => {
     }
 };
 
+// @route   GET /api/auth/status
 exports.checkStatus = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('isPaid');
