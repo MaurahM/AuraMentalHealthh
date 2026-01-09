@@ -78,6 +78,8 @@ exports.registerUser = async (req, res) => {
         await Chat.create({ user: user._id, messages: [] });
 
         // 6. Send Email
+       // ... user is created successfully ...
+
         try {
             const verifyUrl = `https://auramentalhealthh-production.up.railway.app/api/user/verify/${vToken}`;
             
@@ -85,17 +87,19 @@ exports.registerUser = async (req, res) => {
                 from: `"Aura Support" <${process.env.EMAIL_USER}>`, 
                 to: email,
                 subject: "Verify your Aura Account",
-                html: `<h2>Welcome to Aura, ${username}!</h2><p>Click below to verify your account:</p><a href="${verifyUrl}" style="background:#ff2fa6; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;">Verify Now</a>`
+                html: `<h2>Welcome to Aura, ${username}!</h2><p>Click below to verify:</p><a href="${verifyUrl}" style="background:#ff2fa6; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;">Verify Now</a>`
             });
 
+            // THIS LINE SENDS THE SIGNAL TO THE FRONTEND TO STOP "PROCESSING"
             return res.status(201).json({
                 message: 'Sign-up successful! Please check your email to verify your account.'
             });
 
         } catch (emailError) {
-            console.error('Email failed to send:', emailError);
+            console.error('Email failed:', emailError);
+            // THIS LINE ALSO STOPS THE "PROCESSING" IF THE EMAIL FAILS
             return res.status(201).json({
-                message: 'Account created, but we had trouble sending the verification email. Check spam or contact support.'
+                message: 'Account created, but we had trouble sending the email. Check spam or contact support.'
             });
         }
 
