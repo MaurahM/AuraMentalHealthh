@@ -68,10 +68,10 @@ exports.registerUser = async (req, res) => {
 
         // NEW: Send the Verification Email
         // Change 'your-site.com' to your actual Railway frontend URL
-        const verifyUrl = `https://auramentalhealthh-production.up.railway.app/api/users/verify/${vToken}`;
+        const verifyUrl = `https://auramentalhealthh-production.up.railway.app/api/user/verify/${vToken}`;
 
         await transporter.sendMail({
-            from: '"Aura Support" info.auraafrica@gmail.com>',
+            from: '"Aura Support" <info.auraafrica@gmail.com>',
             to: email,
             subject: "Verify your Aura Account",
             html: `<h2>Welcome to Aura, ${username}!</h2>
