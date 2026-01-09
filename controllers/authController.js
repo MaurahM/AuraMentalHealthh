@@ -9,13 +9,15 @@ const nodemailer = require('nodemailer');
 // 1. Set up the Email Transporter
 // Ensure EMAIL_USER and EMAIL_PASS are set in Railway Variables
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
     host: 'smtp.gmail.com',
     port: 465,
-    secure: true, // Use SSL
+    secure: true, // Use SSL/TLS
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
+    },
+    tls: {
+        rejectUnauthorized: false // Helps prevent connection blocks
     }
 });
 
@@ -40,31 +42,14 @@ const checkEmailDomain = (email) => {
 exports.registerUser = async (req, res) => {
     const { username, email, password } = req.body;
 
-    if (!username || !email || !password) {
-        return res.status(400).json({ message: 'Please enter all fields' });
-    }
+    // ... (Keep your validation and DNS check code here) ...
 
     try {
-        // DNS Validation
-        const isDomainValid = await checkEmailDomain(email);
-        if (!isDomainValid) {
-            return res.status(400).json({ message: 'The provided email domain is invalid.' });
-        }
+        // ... (Keep your bcrypt hashing code here) ...
 
-        // Check if user exists
-        let user = await User.findOne({ email });
-        if (user) {
-            return res.status(400).json({ message: 'User already exists' });
-        }
-
-        // Hash password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        // Create unique token for email verification
         const vToken = crypto.randomBytes(32).toString('hex');
 
-        // Create new user (isVerified defaults to false)
+        // --- PASTE THE NEW CODE STARTING HERE ---
         user = await User.create({
             username,
             email,
@@ -73,34 +58,30 @@ exports.registerUser = async (req, res) => {
             isVerified: false 
         });
 
-        // Create initial chat document
         await Chat.create({ user: user._id, messages: [] });
 
-        // Generate Verification Link 
-        // Note: Using /api/user to match app.use('/api/user', userRoutes) in server.js
-        const verifyUrl = `https://auramentalhealthh-production.up.railway.app/api/user/verify/${vToken}`;
+        try {
+            const verifyUrl = `https://auramentalhealthh-production.up.railway.app/api/user/verify/${vToken}`;
+            
+            await transporter.sendMail({
+                from: `"Aura Support" <${process.env.EMAIL_USER}>`, 
+                to: email,
+                subject: "Verify your Aura Account",
+                html: `<h2>Welcome to Aura, ${username}!</h2><p>Click below to verify:</p><a href="${verifyUrl}">Verify Now</a>`
+            });
 
-        // Send Email
-        await transporter.sendMail({
-            from: '"Aura Support" <info.auraafrica@gmail.com>',
-            to: email,
-            subject: "Verify your Aura Account",
-            html: `
-                <div style="font-family: sans-serif; max-width: 600px; margin: auto; border: 1px solid #eee; padding: 20px;">
-                    <h2 style="color: #ff2fa6; text-align: center;">Welcome to Aura, ${username}!</h2>
-                    <p>Thank you for joining our community. To get started, please confirm your email address by clicking the button below:</p>
-                    <div style="text-align: center; margin: 30px 0;">
-                        <a href="${verifyUrl}" style="background-color: #ff2fa6; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Verify My Account</a>
-                    </div>
-                    <p style="font-size: 0.8em; color: #777;">If you did not create this account, you can safely ignore this email.</p>
-                </div>
-            `
-        });
+            return res.status(201).json({
+                message: 'Sign-up successful! Please check your email to verify your account.'
+            });
 
-        res.status(201).json({
-            message: 'Sign-up successful! Please check your email to verify your account.'
-        });
-        
+        } catch (emailError) {
+            console.error('Email failed to send:', emailError);
+            return res.status(201).json({
+                message: 'Account created, but we had trouble sending the verification email. Please check your spam or contact support.'
+            });
+        }
+        // --- PASTE ENDS HERE ---
+
     } catch (error) {
         console.error('Signup Error:', error);
         res.status(500).json({ message: 'Server error during registration' });

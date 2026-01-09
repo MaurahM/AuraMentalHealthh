@@ -223,11 +223,13 @@ form.addEventListener('submit', async (e) => {
     }
 
     // Success
-    alert('Sign-up successful! 📧 Please check your email to verify your account before logging in.');
-    
-    // Redirect to login page
-    window.location.href = 'login.html';
-
+    // Success
+    if (res.status === 201) {
+      // This will show either the "Check your email" message 
+      // OR the "Account created but email failed" message from the backend.
+      alert(data.message); 
+      window.location.href = 'login.html';
+    }
   } catch (err) {
     error.textContent = 'Network error. Could not connect to the server.';
     console.error('Fetch Error:', err);
