@@ -29,13 +29,20 @@ const UserSchema = new mongoose.Schema({
     subscriptionExpiry: { 
         type: Date 
     },
-    // We store the IntaSend Invoice ID to track M-Pesa payments
     intasend_invoice_id: { 
         type: String,
         default: null
     },
-    // Useful for STK Push troubleshooting
     phoneNumber: {
+        type: String,
+        default: null
+    },
+    // --- EMAIL VERIFICATION FIELDS ---
+    isVerified: { 
+        type: Boolean, 
+        default: false // New users must verify before this becomes true
+    },
+    verificationToken: { 
         type: String,
         default: null
     }

@@ -3,15 +3,22 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Chat = require('../models/Chat'); 
 const dns = require('dns');
+const crypto = require('crypto'); // NEW: For generating tokens
+const nodemailer = require('nodemailer'); // NEW: For sending emails
 
-// Helper function to generate JWT
+// NEW: Set up the Email Transporter
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
 const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: '30d',
-    });
+    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
-// DNS Check for Email Validity
 const checkEmailDomain = (email) => {
     const domain = email.split('@')[1];
     return new Promise((resolve) => {
@@ -25,8 +32,6 @@ const checkEmailDomain = (email) => {
     });
 };
 
-// @route   POST /api/auth/signup
-// @desc    Register a new user
 exports.registerUser = async (req, res) => {
     const { username, email, password } = req.body;
 
@@ -35,48 +40,55 @@ exports.registerUser = async (req, res) => {
     }
 
     try {
-        // Validate Email Domain
         const isDomainValid = await checkEmailDomain(email);
         if (!isDomainValid) {
-            return res.status(400).json({ message: 'The provided email domain is invalid or cannot receive mail.' });
+            return res.status(400).json({ message: 'Invalid email domain.' });
         }
 
-        // Check if user exists
         let user = await User.findOne({ email });
         if (user) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Create new user (isPaid defaults to false in Schema)
+        // NEW: Create a unique verification token
+        const vToken = crypto.randomBytes(32).toString('hex');
+
         user = await User.create({
             username,
             email,
             password: hashedPassword,
+            verificationToken: vToken, // NEW: Save to DB
+            isVerified: false          // NEW: Default to false
         });
 
-        // Create initial chat document
         await Chat.create({ user: user._id, messages: [] });
 
-        res.status(201).json({
-            message: 'Sign-up successful!',
-            _id: user._id,
-            username: user.username,
-            email: user.email,
-            isPaid: false, // New users start unpaid
-            token: generateToken(user._id),
+        // NEW: Send the Verification Email
+        // Change 'your-site.com' to your actual Railway frontend URL
+        const verifyUrl = `https://auramentalhealthh-production.up.railway.app/api/users/verify/${vToken}`;
+
+        await transporter.sendMail({
+            from: '"Aura Support" info.auraafrica@gmail.com>',
+            to: email,
+            subject: "Verify your Aura Account",
+            html: `<h2>Welcome to Aura, ${username}!</h2>
+                   <p>Please click the button below to verify your account:</p>
+                   <a href="${verifyUrl}" style="background:#ff2fa6; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;">Verify Now</a>`
         });
+
+        res.status(201).json({
+            message: 'Sign-up successful! Please check your email to verify your account.'
+        });
+        
     } catch (error) {
         console.error('Signup Error:', error);
         res.status(500).json({ message: 'Server error during registration' });
     }
 };
 
-// @route   POST /api/auth/login
-// @desc    Authenticate user & get token
 exports.loginUser = async (req, res) => {
     const { email, password } = req.body;
 
@@ -87,6 +99,11 @@ exports.loginUser = async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
+        // NEW: Block login if not verified
+        if (!user.isVerified) {
+            return res.status(403).json({ message: 'Please verify your email before logging in.' });
+        }
+
         const isMatch = await bcrypt.compare(password, user.password);
         
         if (isMatch) {
@@ -94,7 +111,7 @@ exports.loginUser = async (req, res) => {
                 _id: user._id,
                 username: user.username,
                 email: user.email,
-                isPaid: user.isPaid || false, // Return payment status to frontend
+                isPaid: user.isPaid || false,
                 token: generateToken(user._id), 
             });
         } else {
@@ -106,11 +123,8 @@ exports.loginUser = async (req, res) => {
     }
 };
 
-// @route   GET /api/auth/status
-// @desc    Check if the logged-in user has paid (Security check for Dashboard)
 exports.checkStatus = async (req, res) => {
     try {
-        // req.user.id comes from your protect middleware
         const user = await User.findById(req.user.id).select('isPaid');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });

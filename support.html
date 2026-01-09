@@ -151,61 +151,68 @@
             <p class="text-muted/70">Need technical help? Leave your details and we'll reach out within 24 hours.</p>
         </div>
 
-        <form id="contactForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="flex flex-col">
-                <label class="text-xs font-bold uppercase tracking-wider mb-2 ml-1 text-accent/80">Email Address</label>
-                <input type="email" required placeholder="name@example.com" 
-                       class="w-full px-5 py-4 rounded-xl glass-input text-white focus:outline-none focus:ring-2 focus:ring-accent/50 transition bg-white/5 border border-white/10">
-            </div>
-
-            <div class="flex flex-col">
-                <label class="text-xs font-bold uppercase tracking-wider mb-2 ml-1 text-accent/80">Phone Number</label>
-                <input type="tel" required placeholder="+254..." 
-                       class="w-full px-5 py-4 rounded-xl glass-input text-white focus:outline-none focus:ring-2 focus:ring-accent/50 transition bg-white/5 border border-white/10">
-            </div>
-
-            <div class="flex flex-col md:col-span-2">
-                <label class="text-xs font-bold uppercase tracking-wider mb-2 ml-1 text-accent/80">How can we help?</label>
-                <textarea rows="4" required placeholder="Tell us what's on your mind..." 
-                          class="w-full px-5 py-4 rounded-xl glass-input text-white focus:outline-none focus:ring-2 focus:ring-accent/50 transition bg-white/5 border border-white/10 resize-none"></textarea>
-            </div>
-
-            <div class="md:col-span-2 text-center mt-4">
-                <button type="submit" class="px-12 py-4 rounded-full bg-gradient-to-r from-accent to-[#FF80BD] text-white font-bold shadow-xl hover:scale-[1.02] active:scale-[0.98] transition btn-glow">
-                    Send Message →
-                </button>
-            </div>
-        </form>
+        <form id="contactForm" action="https://formspree.io/f/mvzzpzwn" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    
+    <div class="flex flex-col">
+        <label class="text-xs font-bold uppercase tracking-wider mb-2 ml-1 text-accent/80">Email Address</label>
+        <input type="email" name="email" required placeholder="name@example.com" 
+               class="w-full px-5 py-4 rounded-xl glass-input text-white focus:outline-none focus:ring-2 focus:ring-accent/50 transition bg-white/5 border border-white/10">
     </div>
-</section>
+
+    <div class="flex flex-col">
+        <label class="text-xs font-bold uppercase tracking-wider mb-2 ml-1 text-accent/80">Phone Number</label>
+        <input type="tel" name="phone" required placeholder="+254..." 
+               class="w-full px-5 py-4 rounded-xl glass-input text-white focus:outline-none focus:ring-2 focus:ring-accent/50 transition bg-white/5 border border-white/10">
+    </div>
+
+    <div class="flex flex-col md:col-span-2">
+        <label class="text-xs font-bold uppercase tracking-wider mb-2 ml-1 text-accent/80">How can we help?</label>
+        <textarea name="message" rows="4" required placeholder="Tell us what's on your mind..." 
+                  class="w-full px-5 py-4 rounded-xl glass-input text-white focus:outline-none focus:ring-2 focus:ring-accent/50 transition bg-white/5 border border-white/10 resize-none"></textarea>
+    </div>
+
+    <div class="md:col-span-2 text-center mt-4">
+        <button type="submit" id="submitBtn" class="px-12 py-4 rounded-full bg-gradient-to-r from-accent to-[#FF80BD] text-white font-bold shadow-xl hover:scale-[1.02] active:scale-[0.98] transition btn-glow">
+            Send Message →
+        </button>
+    </div>
+</form>
 
 <script>
-    // Simple handler to show you it works
-    document.getElementById('contactForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+    const form = document.getElementById('contactForm');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault(); // Stop page from refreshing
         
-        // Change button text to show progress
-        const btn = this.querySelector('button');
+        const btn = document.getElementById('submitBtn');
         const originalText = btn.innerHTML;
+        
+        // UI Feedback
         btn.innerHTML = "Sending...";
         btn.disabled = true;
 
-        // Simulate a send (You can connect this to your Railway API later)
-        setTimeout(() => {
-            alert("Thank you! Aura's support team has received your message.");
+        // Collect data
+        const data = new FormData(event.target);
+
+        // Send to Formspree
+        fetch(event.target.action, {
+            method: 'POST',
+            body: data,
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                alert("Thank you! Aura's support team has received your message.");
+                form.reset();
+            } else {
+                alert("Oops! There was a problem submitting your form.");
+            }
+        }).catch(error => {
+            alert("Error: Could not connect to the server.");
+        }).finally(() => {
             btn.innerHTML = originalText;
             btn.disabled = false;
-            this.reset();
-        }, 1500);
+        });
     });
 </script>
-
-<footer class="py-10 text-center border-t border-white/5">
-    <p class="text-xs text-muted/40">© 2026 Aura Mental Health. Built with 💗 for the community.</p>
-</footer>
-
-<script>
-    lucide.createIcons();
-</script>
-</body>
-</html>
