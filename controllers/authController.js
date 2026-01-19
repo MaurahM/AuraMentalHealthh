@@ -82,6 +82,14 @@ exports.registerUser = async (req, res) => {
                 </a>`
         });
 
+        transporter.sendMail(mailOptions, (err, info) => {
+  if (err) {
+    console.log("Email Error:", err);
+  } else {
+    console.log("Email Sent:", info.response);
+  }
+});
+
         return res.status(201).json({
             message: 'Sign-up successful! Please check your email to verify your account.'
         });
