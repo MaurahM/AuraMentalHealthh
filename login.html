@@ -1,237 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Log In Conversational AI</title>
-<style>
-  :root{
-    --bg:#3b1534; /* page background */
-    --accent:#ff2fa6; /* pink button */
-    --muted:#d9c9dc;
-    --white: #ffffff;
-    --dark-input: rgba(0, 0, 0, 0.2);
-  }
-  /* ---------------------- GLOBAL & LAYOUT ---------------------- */
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;background:var(--bg);color:var(--white)}
-  .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:48px;box-sizing:border-box}
-  .card{
-    width:100%;max-width:920px;
-    background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.03));
-    border-radius:12px; /* Increased radius */
-    padding:40px;
-    /* ENHANCED SHADOW FOR DEPTH */
-    box-shadow:
-      0 40px 80px rgba(0, 0, 0, 0.7), 
-      0 0 100px rgba(255, 47, 166, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.05); /* Subtle border */
-    backdrop-filter: blur(8px); /* Frosted glass effect */
-    display:flex;gap:28px;align-items:center;box-sizing:border-box
-  }
-  .left,.right{flex:1;min-width:0}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Aura | Welcome Back</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #1a0b16;
+      --card-bg: rgba(59, 21, 52, 0.4);
+      --accent: #ff2fa6;
+      --accent-glow: rgba(255, 47, 166, 0.3);
+      --muted: #bda7be;
+      --white: #ffffff;
+    }
 
-  /* ---------------------- LEFT PANEL (INFO) ---------------------- */
-  .left{padding:18px 28px;border-right:2px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;align-items:center;gap:18px}
-  .illustration{
-    width:160px;height:160px;border-radius:999px;display:flex;align-items:center;justify-content:center;
-    /* GIVING THE ILLUSTRATION A GLOW */
-    border:3px solid rgba(255,255,255,0.12);
-    box-shadow: 0 0 40px rgba(255, 47, 166, 0.15); 
-  }
-  /* SVG ICON COLOR UPDATE */
-  .illustration svg path:first-child { 
-    fill: var(--accent); 
-    opacity: 0.6;
-  }
-  .headline{font-weight:700;font-size:24px;letter-spacing:1px;line-height:1.2;text-align:center} /* Larger headline */
-  .lead{color:var(--muted);max-width:320px;line-height:1.6;font-size:15px;text-align:center} /* Slightly larger lead text */
+    * { box-sizing: border-box; }
 
-  /* ---------------------- RIGHT FORM ---------------------- */
-  .form-wrap{display:flex;flex-direction:column;align-items:center;padding:8px 12px}
-  .form-card{width:100%;max-width:420px}
-  h1{margin:6px 0 24px;font-size:30px;text-align:center;font-weight:800;} /* Larger and bolder title */
-  form{display:flex;flex-direction:column;gap:16px} /* Increased form gap */
-  label{display:block;font-size:14px;margin-bottom:6px;color:rgba(255,255,255,0.9);font-weight:600;} /* Bolder label */
-  
-  /* INPUT FIELD STYLES */
-  .pill{
-    flex-grow: 1; /* Make pill take available space in pw-row */
-    display:block;width:100%;padding:14px 20px; /* Increased padding */
-    border-radius:999px;border:1px solid rgba(255, 255, 255, 0.1);
-    background:var(--dark-input); /* Dark input background */
-    box-sizing:border-box;font-size:15px;color:var(--white); /* White text */
-    outline:none;
-    box-shadow:inset 0 1px 3px rgba(0,0,0,0.4);
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .pill::placeholder{color:rgba(255, 255, 255, 0.45)} /* Lighter placeholder */
-  .pill:focus {
-    border-color: var(--accent); /* Accent color on focus */
-    box-shadow: 0 0 0 3px rgba(255, 47, 166, 0.3), inset 0 1px 3px rgba(0,0,0,0.4);
-  }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      color: var(--white);
+      background: var(--bg);
+      background: radial-gradient(circle at 100% 100%, #3b1534 0%, #1a0b16 50%, #2a0e24 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
 
-  /* BUTTON STYLES */
-  .btn{
-    display:inline-block;margin-top:8px;width:240px; /* Wider button */
-    background:linear-gradient(90deg,#ff2fa6,#ff5aa8);color:#fff;border:0;
-    padding:12px 24px;border-radius:999px;font-weight:700;cursor:pointer;
-    box-shadow:0 10px 30px rgba(255,47,166,0.3); /* Deeper button shadow */
-    transition: all 0.2s ease;
-  }
-  .btn:hover{
-    background:linear-gradient(90deg,#ff40b3,#ff71b5); /* Brighter hover gradient */
-    box-shadow:0 12px 35px rgba(255,47,166,0.5); /* Glowing hover shadow */
-  }
-  .btn:active{transform:translateY(1px);box-shadow:0 8px 25px rgba(255,47,166,0.3)}
+    .container {
+      width: 100%;
+      max-width: 850px;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 28px;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+    }
 
-  .muted{color:var(--muted);font-size:14px;text-align:center}
-  .error{color:#ffb3c6;font-size:13px;min-height:18px;text-align:center}
-  .pw-row{
-    display:flex;align-items:center;gap:8px;
-    border-radius:999px; /* Ensure row elements are visually aligned */
-  }
-  .pw-row .pill {
-    width: auto; /* Allow input to fill space */
-  }
-  .pw-toggle{
-    background:transparent;border:0;color:var(--accent);cursor:pointer;padding:6px;font-size:14px;
-    font-weight: 600;
-    transition: color 0.2s;
-  }
-  .pw-toggle:hover {
-    color: #ff9acb;
-  }
+    /* Left Side: Illustration & Branding */
+    .branding {
+      flex: 1;
+      padding: 60px 40px;
+      background: linear-gradient(135deg, rgba(255, 47, 166, 0.08) 0%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
 
-  @media (max-width:880px){
-    .card{flex-direction:column;padding:20px}
-    .left{order:2;border-right:0;border-top:1px solid rgba(255,255,255,0.04);padding-top:18px}
-    .right{order:1}
-  }
-</style>
+    .illustration {
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .illustration svg {
+      filter: drop-shadow(0 0 20px var(--accent-glow));
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .headline {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      margin-bottom: 15px;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+      font-weight: 300;
+      max-width: 280px;
+    }
+
+    /* Right Side: Action Area */
+    .login-section {
+      flex: 1;
+      padding: 60px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin: 0 0 10px 0;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .google-btn {
+      width: 100%;
+      max-width: 300px;
+      padding: 16px 24px;
+      border-radius: 16px;
+      border: none;
+      background: var(--white);
+      color: #1a0b16;
+      font-weight: 700;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      text-decoration: none;
+    }
+
+    .google-btn:hover {
+      transform: scale(1.03);
+      background: #fcfcfc;
+      box-shadow: 0 15px 30px rgba(255, 47, 166, 0.2);
+    }
+
+    .google-btn:active {
+      transform: scale(0.98);
+    }
+
+    .google-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .footer-note {
+      margin-top: 30px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .footer-note a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .footer-note a:hover {
+      opacity: 0.8;
+      text-decoration: underline;
+    }
+
+    .error-msg {
+      margin-top: 20px;
+      color: #ff6b6b;
+      font-size: 13px;
+      min-height: 18px;
+    }
+
+    @media (max-width: 768px) {
+      .container { flex-direction: column; margin: 10px; border-radius: 20px; }
+      .branding { padding: 40px 20px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
+      .login-section { padding: 50px 20px; }
+    }
+  </style>
 </head>
 <body>
-  <main class="wrap" role="main" aria-labelledby="loginTitle">
-    <section class="card" aria-labelledby="loginTitle">
-      <div class="left" aria-hidden="false">
-        <div class="illustration" aria-hidden="true">
-              <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path d="M12 21a7 7 0 0 1-7-7c0-3.87 3.13-7 7-7v14z" fill="var(--accent)" fill-opacity="0.3"/>
-  <path d="M12 21a7 7 0 0 0 7-7c0-3.87-3.13-7-7-7v14z" fill="var(--accent)"/>
-  
-  <path d="M12 4c-4.42 0-8 3.58-8 8a8 8 0 0 0 3 6.2M12 4c4.42 0 8 3.58 8 8a8 8 0 0 1-3 6.2" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-opacity="0.8"/>
-  <path d="M9 14h6M12 11v6" stroke="white" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
-  
-  <circle cx="12" cy="12" r="10" stroke="var(--accent)" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
-</svg>
-        </div>
-        <div>
-          <div class="headline">MENTAL HEALTH SUPPORT CONVERSATIONAL AI</div>
-          <p class="lead">Private, empathetic support. Sign in to continue to your dashboard.</p>
-        </div>
+
+  <main class="container">
+    <section class="branding">
+      <div class="illustration">
+        <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="var(--accent)" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
+            <path d="M12 21a7 7 0 0 1-7-7c0-3.87 3.13-7 7-7v14z" fill="var(--accent)" fill-opacity="0.3"/>
+            <path d="M12 21a7 7 0 0 0 7-7c0-3.87-3.13-7-7-7v14z" fill="var(--accent)"/>
+            <path d="M12 4c-4.42 0-8 3.58-8 8a8 8 0 0 0 3 6.2M12 4c4.42 0 8 3.58 8 8a8 8 0 0 1-3 6.2" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-opacity="0.8"/>
+        </svg>
       </div>
+      <div class="headline">Aura AI</div>
+      <p class="lead">Your private space for mindfulness and emotional support.</p>
+    </section>
 
-      <div class="right">
-        <div class="form-wrap">
-          <div class="form-card">
-            <h1 id="loginTitle">Log In</h1>
+    <section class="login-section">
+      <h1>Welcome back</h1>
+      <p class="subtitle">Please sign in to access your dashboard.</p>
 
-            <form id="loginForm" novalidate>
-              <div>
-                <label for="email">Email</label>
-                <input id="email" name="email" type="email" class="pill" placeholder="Type your email" autocomplete="email" required />
-              </div>
+      <button id="googleBtn" class="google-btn">
+        <img src="https://www.svgrepo.com/show/355037/google.svg" class="google-icon" alt="Google Logo" />
+        Continue with Google
+      </button>
 
-              <div>
-                <label for="password">Password</label>
-                <div class="pw-row">
-                  <input id="password" name="password" type="password" class="pill" placeholder="Password" minlength="8" autocomplete="current-password" required />
-                  <button type="button" id="togglePw" class="pw-toggle" aria-pressed="false" aria-label="Show password">Show</button>
-                </div>
-              </div>
+      <div id="error" class="error-msg"></div>
 
-              <div style="display:flex;align-items:center;justify-content:center;margin-top:6px;gap:12px; flex-direction: column;">
-                <span id="error" class="error" aria-live="polite"></span>
-                <button id="submitBtn" class="btn" type="submit">Log in</button>
-              </div>
-
-              <div style="text-align:center;margin-top:12px" class="muted">
-                <a href="Signup.html" style="color:var(--accent);text-decoration:none;font-weight:600">Create account</a> ·
-                <a href="#" style="color:var(--muted);text-decoration:none">Forgot password?</a>
-              </div>
-            </form>
-          </div>
-        </div>
+      <div class="footer-note">
+        New here? <a href="Signup.html">Create an account</a>
       </div>
     </section>
   </main>
 
 <script>
-const API_URL = 'https://auramentalhealthh-production.up.railway.app'; // <--- THIS LINE IS CRITICAL
-const form = document.getElementById('loginForm');
-const pw = document.getElementById('password');
-const toggle = document.getElementById('togglePw');
-const error = document.getElementById('error');
-const submitBtn = document.getElementById('submitBtn');
+  const API_URL = 'https://auramentalhealthh-production.up.railway.app';
+  const googleBtn = document.getElementById('googleBtn');
+  const errorDiv = document.getElementById('error');
 
-toggle.addEventListener('click', () => {
-  const showing = pw.type === 'text';
-  pw.type = showing ? 'password' : 'text';
-  toggle.textContent = showing ? 'Show' : 'Hide';
-  toggle.setAttribute('aria-pressed', String(!showing));
-});
+  googleBtn.addEventListener('click', () => {
+    googleBtn.style.opacity = "0.7";
+    googleBtn.innerText = "Redirecting...";
+    
+    // Smooth transition before redirect
+    setTimeout(() => {
+        window.location.href = `${API_URL}/api/auth/google`;
+    }, 300);
+  });
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  error.textContent = '';
-
-  if (!form.checkValidity()) {
-    error.textContent = 'Please enter a valid email and password.';
-    return;
+  // Handle potential URL error params (e.g., ?error=access_denied)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('error')) {
+    errorDiv.textContent = 'Authentication failed. Please try again.';
   }
-  if (pw.value.length < 8) {
-    error.textContent = 'Password must be at least 8 characters.';
-    pw.focus();
-    return;
-  }
-
-  const loginEmail = form.email.value.trim();
-  const loginPassword = pw.value;
-
-  const payload = {
-    email: loginEmail,
-    password: loginPassword
-  };
-
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Verifying...';
-
-  try {
-    // <-- Here is the updated fetch call
-    const res = await fetch(`${API_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      error.textContent = data.message || 'Login failed. Check your credentials.';
-      return;
-    }
-
-    // Successful login
-    localStorage.setItem('userToken', data.token);
-    // Redirect to dashboard (assuming successful login)
-    window.location.href = 'Dashboard.html';
-  } catch (err) {
-    console.error(err);
-    error.textContent = 'Network error. Could not connect to the server.';
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Log in';
-  }
-});
 </script>
 
 </body>

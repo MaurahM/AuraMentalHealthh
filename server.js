@@ -38,6 +38,21 @@ app.use('/api/user', userRoutes);
 
 app.get('/', (req, res) => res.send('Aura API - Mpesa Ready 🚀'));
 
+const session = require('express-session');
+const passport = require('passport');
+
+app.use(session({
+  secret: 'yourSecret',
+  resave: false,
+  saveUninitialized: true
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use('/api/auth', require('./Routes/authGoogle'));
+
+
 // Listen on 0.0.0.0 for Railway compatibility
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server on port ${PORT}`));
