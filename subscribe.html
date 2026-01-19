@@ -243,60 +243,58 @@
         </div>
     </div>
 
-    <script>
-    // 1. Initialize for LIVE MODE
-    const intasend = new window.IntaSend({
-        publicAPIKey: "ISPubKey_live_d0d3e243-2fad-4268-bd05-4320a8fc7b6d",
-        live: true 
-    });
+ <script>
+const payBtn = document.getElementById('pay-btn');
+const phoneInput = document.getElementById('phone');
 
-    const payBtn = document.getElementById('pay-btn');
-    const phoneInput = document.getElementById('phone');
+payBtn.addEventListener('click', async () => {
+    let phone = phoneInput.value.trim();
+    phone = phone.replace(/\D/g, '');
 
-    payBtn.addEventListener('click', () => {
-        let phone = phoneInput.value.trim();
-        
-        // Clean phone number
-        phone = phone.replace(/\D/g, ''); 
-        if (phone.startsWith('0')) {
-            phone = '254' + phone.slice(1);
-        } else if (phone.startsWith('7') || phone.startsWith('1')) {
-            phone = '254' + phone;
-        }
+    if (phone.startsWith('0')) {
+        phone = '254' + phone.slice(1);
+    } else if (phone.startsWith('7') || phone.startsWith('1')) {
+        phone = '254' + phone;
+    }
 
-        if (!/^254(7|1)\d{8}$/.test(phone)) {
-            alert("Invalid M-Pesa number.");
-            return;
-        }
+    if (!/^254(7|1)\d{8}$/.test(phone)) {
+        alert("Invalid M-Pesa number.");
+        return;
+    }
 
-        payBtn.disabled = true;
-        payBtn.innerHTML = `<span>Requesting STK...</span>`;
+    payBtn.disabled = true;
+    payBtn.innerHTML = `<span>Requesting STK...</span>`;
 
-        // 2. THE FIX FOR 400 "Enter a valid URL"
-        intasend.run({
-            amount: 300,
-            currency: "KES",
-            phone_number: phone,
-            email: localStorage.getItem('user_email') || "customer@aura.app",
-            api_ref: "AuraLive_" + Math.floor(Date.now() / 1000),
-            method: "M-PESA",
-            // CRITICAL: Force the host and redirect URL so the server validates the request
-            host: window.location.origin, 
-            redirect_url: window.location.origin + "/Dashboard.html" 
-        })
-        .on("COMPLETE", (results) => {
-            localStorage.setItem('justPaid', 'true');
-            window.location.href = "Dashboard.html";
-        })
-        .on("FAILED", (results) => {
-            payBtn.disabled = false;
-            payBtn.innerHTML = `<span>Activate Now</span>`;
-            alert("Payment Failed: " + (results.error || "Please try again."));
-        })
-        .on("IN-PROGRESS", () => {
-            payBtn.innerHTML = `<span>Enter PIN 📱</span>`;
+    try {
+        const res = await fetch("https://yourbackend.com/api/mpesa/stk-push", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                // if you use auth add token here
+            },
+            body: JSON.stringify({
+                phone: phone,
+                amount: 300,
+                plan: "monthly"
+            })
         });
-    });
-    </script>
+
+        const data = await res.json();
+
+        if (data.success) {
+            payBtn.innerHTML = `<span>Enter PIN 📱</span>`;
+            alert("STK Push sent! Check your phone.");
+            // Optionally you can redirect to a waiting page
+        } else {
+            throw new Error(data.error || "Payment failed");
+        }
+    } catch (error) {
+        payBtn.disabled = false;
+        payBtn.innerHTML = `<span>Activate Now</span>`;
+        alert("Payment Failed: " + error.message);
+    }
+});
+</script>
+
 </body>
 </html>

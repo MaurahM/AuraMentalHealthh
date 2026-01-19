@@ -18,36 +18,68 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+
     // --- SUBSCRIPTION FIELDS ---
-    isPaid: { 
-        type: Boolean, 
-        default: false 
+    isPaid: {
+        type: Boolean,
+        default: false
     },
-    subscriptionDate: { 
-        type: Date 
+    subscriptionDate: {
+        type: Date,
+        default: null
     },
-    subscriptionExpiry: { 
-        type: Date 
+    subscriptionExpiry: {
+        type: Date,
+        default: null
     },
-    intasend_invoice_id: { 
+
+    // --- M-PESA STK PUSH FIELDS ---
+    mpesaCheckoutRequestID: {
         type: String,
         default: null
     },
+    mpesaMerchantRequestID: {
+        type: String,
+        default: null
+    },
+    mpesaStatus: {
+        type: String,
+        default: null
+    },
+
     phoneNumber: {
         type: String,
         default: null
     },
-    // --- EMAIL VERIFICATION FIELDS ---
-    isVerified: { 
-        type: Boolean, 
-        default: false // New users must verify before this becomes true
+
+    // --- RENEWAL REMINDER / AUTO-RENEW ---
+    autoRenew: {
+        type: Boolean,
+        default: false
     },
-    verificationToken: { 
+    renewalReminderSent: {
+        type: Boolean,
+        default: false
+    },
+
+    // --- EMAIL VERIFICATION FIELDS ---
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+    verificationToken: {
         type: String,
         default: null
+    },
+
+    // OPTIONAL (for future upgrades)
+    subscriptionPrice: {
+        type: Number,
+        default: 300
     }
-}, { 
-    timestamps: true 
+
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model('User', UserSchema);
