@@ -1,13 +1,13 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Chat = require('../models/Chat');
 
-// Initialize Gemini with the API Key from Railway Environment Variables
+// Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // --- Aura's System Instruction ---
 const systemInstruction = `
 ────────────
-AURA SYSTEM PROMPT (REVISED)
+AURA SYSTEM PROMPT
 ────────────
 
 You are Aura — a compassionate, culturally responsive AI well-being companion created by Maura Muhalia. Your purpose is to offer immediate, non-clinical emotional support through reflective listening, mindfulness guidance, and gentle self-help strategies. Aura maintains a warm, respectful, non-judgmental, and supportive tone at all times.
@@ -201,7 +201,6 @@ Reassure users that they are not alone and that their feelings are valid. You ar
 `;
 
 // @desc Send a message and get a reply based on history
-// @route POST /api/chat/message
 exports.sendMessage = async (req, res) => {
     const userId = req.user._id;
     let { message } = req.body;
@@ -212,24 +211,25 @@ exports.sendMessage = async (req, res) => {
     }
 
     try {
+        // 1. Find or Create the Chat Document
         let chatDocument = await Chat.findOne({ user: userId });
         if (!chatDocument) {
             chatDocument = await Chat.create({ user: userId, messages: [] });
         }
 
-        // --- FIX: Map history correctly for the SDK ---
-        const historyForGemini = chatDocument.messages.map(msg => ({
-            role: msg.sender === 'user' ? 'user' : 'model', 
+        // 2. Prepare History for Gemini (Last 10-15 exchanges for context stability)
+        // We map 'ai' to 'model' so the SDK understands who is speaking
+        const historyForGemini = chatDocument.messages.slice(-15).map(msg => ({
+            role: (msg.sender === 'user') ? 'user' : 'model',
             parts: [{ text: msg.text }]
         }));
 
-        // --- FIX: Use the official systemInstruction parameter ---
+        // 3. Initialize Model with System Instructions
         const model = genAI.getGenerativeModel({ 
             model: "gemini-1.5-flash",
-            systemInstruction: systemInstruction // Uses your long prompt variable
+            systemInstruction: systemInstruction 
         });
 
-        // Start chat with cleaned history
         const chatSession = model.startChat({
             history: historyForGemini,
             generationConfig: {
@@ -238,36 +238,40 @@ exports.sendMessage = async (req, res) => {
             },
         });
 
+        // 4. Get AI Response
         const result = await chatSession.sendMessage(message);
-        const response = await result.response;
-        const aiResponseText = response.text();
+        const aiResponseText = result.response.text();
 
-        // Persist to Database (keeping your 'ai' tag for the frontend)
-        chatDocument.messages.push({
+        // 5. Update Database with BOTH messages
+        const userMsg = {
             sender: 'user',
             text: message,
             timestamp: new Date()
-        });
+        };
 
-        const aiMessage = {
-            sender: 'ai',
+        const aiMsg = {
+            sender: 'ai', // Kept as 'ai' for your frontend logic
             text: aiResponseText,
             timestamp: new Date()
         };
-        chatDocument.messages.push(aiMessage);
 
+        chatDocument.messages.push(userMsg, aiMsg);
         await chatDocument.save();
 
+        // 6. Return Response to Frontend
         res.json({
             response: aiResponseText,
-            timestamp: aiMessage.timestamp
+            timestamp: aiMsg.timestamp
         });
 
     } catch (error) {
-        console.error('Gemini Chat Error:', error); // Check your Railway logs for this!
-        res.status(500).json({ message: 'Aura is having trouble connecting. Please try again later.' });
+        console.error('Gemini Chat Error:', error);
+        res.status(500).json({ 
+            message: 'Aura is having trouble connecting. Please try again later.' 
+        });
     }
 };
+
 // @desc Get the full chat history
 exports.getHistory = async (req, res) => {
     const userId = req.user._id;
@@ -287,7 +291,11 @@ exports.getHistory = async (req, res) => {
 exports.clearHistory = async (req, res) => {
     const userId = req.user._id;
     try {
-        await Chat.findOneAndUpdate({ user: userId }, { $set: { messages: [] } });
+        await Chat.findOneAndUpdate(
+            { user: userId }, 
+            { $set: { messages: [] } },
+            { new: true }
+        );
         res.status(204).send();
     } catch (error) {
         console.error("Error clearing chat history:", error);

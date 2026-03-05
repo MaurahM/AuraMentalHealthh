@@ -6,15 +6,16 @@
   <title>Aura | Welcome Back</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #1a0b16;
-      --card-bg: rgba(59, 21, 52, 0.4);
+      --card-bg: rgba(43, 16, 38, 0.6);
       --accent: #ff2fa6;
-      --accent-glow: rgba(255, 47, 166, 0.3);
-      --muted: #bda7be;
+      --accent-glow: rgba(255, 47, 166, 0.4);
+      --muted: #d1b8d3;
       --white: #ffffff;
+      --input-bg: rgba(255, 255, 255, 0.05);
     }
 
     * { box-sizing: border-box; }
@@ -25,7 +26,10 @@
       font-family: 'Inter', sans-serif;
       color: var(--white);
       background: var(--bg);
-      background: radial-gradient(circle at 100% 100%, #3b1534 0%, #1a0b16 50%, #2a0e24 100%);
+      background: 
+        radial-gradient(circle at 0% 0%, #3b1534 0%, transparent 40%),
+        radial-gradient(circle at 100% 100%, #4a1a41 0%, #1a0b16 50%),
+        #1a0b16;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -34,149 +38,173 @@
 
     .container {
       width: 100%;
-      max-width: 850px;
+      max-width: 900px; /* Slightly wider to accommodate form */
       background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 28px;
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 32px;
       display: flex;
       overflow: hidden;
-      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.7);
+      position: relative;
     }
 
-    /* Left Side: Illustration & Branding */
+    /* Left Side: Branding */
     .branding {
       flex: 1;
-      padding: 60px 40px;
-      background: linear-gradient(135deg, rgba(255, 47, 166, 0.08) 0%, transparent 100%);
+      padding: 60px 45px;
+      background: linear-gradient(135deg, rgba(255, 47, 166, 0.1) 0%, transparent 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .illustration {
-      margin-bottom: 30px;
-      position: relative;
-    }
-
-    .illustration svg {
-      filter: drop-shadow(0 0 20px var(--accent-glow));
-      animation: float 6s ease-in-out infinite;
+    .main-logo {
+      height: 100px;
+      width: auto;
+      filter: drop-shadow(0 0 15px var(--accent-glow));
+      animation: float 5s ease-in-out infinite;
+      margin-bottom: 25px;
     }
 
     @keyframes float {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+      50% { transform: translateY(-12px); }
     }
 
     .headline {
-      font-size: 20px;
+      font-size: 24px;
       font-weight: 800;
-      letter-spacing: 2px;
-      margin-bottom: 15px;
-      color: var(--accent);
-      text-transform: uppercase;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, #fff, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .lead {
       color: var(--muted);
       font-size: 15px;
       line-height: 1.6;
-      font-weight: 300;
-      max-width: 280px;
+      max-width: 260px;
     }
 
     /* Right Side: Action Area */
     .login-section {
-      flex: 1;
-      padding: 60px 40px;
+      flex: 1.2;
+      padding: 50px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      align-items: center;
+      background: rgba(0, 0, 0, 0.1);
     }
 
-    h1 {
-      font-size: 32px;
-      margin: 0 0 10px 0;
-      font-weight: 800;
+    h1 { font-size: 32px; margin: 0 0 8px 0; font-weight: 800; }
+    .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 30px; }
+
+    /* Form Styles */
+    form { width: 100%; display: flex; flex-direction: column; gap: 18px; }
+    
+    .input-group { display: flex; flex-direction: column; gap: 8px; }
+    .input-group label { font-size: 13px; font-weight: 600; color: var(--muted); }
+    
+    input {
+      background: var(--input-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 14px 18px;
+      border-radius: 12px;
+      color: white;
+      font-family: inherit;
+      font-size: 15px;
+      transition: all 0.3s ease;
     }
 
-    .subtitle {
-      color: var(--muted);
-      font-size: 14px;
-      margin-bottom: 40px;
-      text-align: center;
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 15px rgba(255, 47, 166, 0.15);
     }
 
-    .google-btn {
-      width: 100%;
-      max-width: 300px;
-      padding: 16px 24px;
-      border-radius: 16px;
+    .login-btn {
+      background: var(--accent);
+      color: white;
       border: none;
-      background: var(--white);
-      color: #1a0b16;
+      padding: 16px;
+      border-radius: 12px;
       font-weight: 700;
       font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .login-btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px var(--accent-glow);
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 25px 0;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .divider:not(:empty)::before { margin-right: 15px; }
+    .divider:not(:empty)::after { margin-left: 15px; }
+
+    /* Google Button */
+    .google-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: transparent;
+      color: white;
+      font-weight: 600;
+      font-size: 15px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 12px;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      text-decoration: none;
+      transition: all 0.3s ease;
     }
 
     .google-btn:hover {
-      transform: scale(1.03);
-      background: #fcfcfc;
-      box-shadow: 0 15px 30px rgba(255, 47, 166, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
-    .google-btn:active {
-      transform: scale(0.98);
-    }
-
-    .google-icon {
-      width: 20px;
-      height: 20px;
-    }
+    .google-icon { width: 20px; height: 20px; }
 
     .footer-note {
       margin-top: 30px;
       font-size: 14px;
+      text-align: center;
       color: var(--muted);
     }
-
-    .footer-note a {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 600;
-      transition: opacity 0.2s;
-    }
-
-    .footer-note a:hover {
-      opacity: 0.8;
-      text-decoration: underline;
-    }
-
-    .error-msg {
-      margin-top: 20px;
-      color: #ff6b6b;
-      font-size: 13px;
-      min-height: 18px;
-    }
+    .footer-note a { color: var(--accent); text-decoration: none; font-weight: 700; }
 
     @media (max-width: 768px) {
-      .container { flex-direction: column; margin: 10px; border-radius: 20px; }
-      .branding { padding: 40px 20px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
-      .login-section { padding: 50px 20px; }
+      .container { flex-direction: column; margin: 10px; }
+      .branding { padding: 40px 20px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+      .login-section { padding: 40px 25px; }
     }
   </style>
 </head>
@@ -184,21 +212,28 @@
 
   <main class="container">
     <section class="branding">
-      <div class="illustration">
-        <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" stroke="var(--accent)" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.4"/>
-            <path d="M12 21a7 7 0 0 1-7-7c0-3.87 3.13-7 7-7v14z" fill="var(--accent)" fill-opacity="0.3"/>
-            <path d="M12 21a7 7 0 0 0 7-7c0-3.87-3.13-7-7-7v14z" fill="var(--accent)"/>
-            <path d="M12 4c-4.42 0-8 3.58-8 8a8 8 0 0 0 3 6.2M12 4c4.42 0 8 3.58 8 8a8 8 0 0 1-3 6.2" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-opacity="0.8"/>
-        </svg>
-      </div>
-      <div class="headline">Aura AI</div>
+      <img src="aura_logo.png" alt="Aura Logo" class="main-logo">
+      <div class="headline">Aura Africa</div>
       <p class="lead">Your private space for mindfulness and emotional support.</p>
     </section>
 
     <section class="login-section">
       <h1>Welcome back</h1>
-      <p class="subtitle">Please sign in to access your dashboard.</p>
+      <p class="subtitle">Please enter your details to sign in.</p>
+
+      <form id="loginForm">
+        <div class="input-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="name@example.com" required>
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="login-btn">Sign In</button>
+      </form>
+
+      <div class="divider">or</div>
 
       <button id="googleBtn" class="google-btn">
         <img src="https://www.svgrepo.com/show/355037/google.svg" class="google-icon" alt="Google Logo" />
@@ -216,23 +251,21 @@
 <script>
   const API_URL = 'https://auramentalhealthh-production.up.railway.app';
   const googleBtn = document.getElementById('googleBtn');
-  const errorDiv = document.getElementById('error');
 
+  // Google Login Logic
   googleBtn.addEventListener('click', () => {
     googleBtn.style.opacity = "0.7";
     googleBtn.innerText = "Redirecting...";
-    
-    // Smooth transition before redirect
     setTimeout(() => {
         window.location.href = `${API_URL}/api/auth/google`;
     }, 300);
   });
 
-  // Handle potential URL error params (e.g., ?error=access_denied)
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has('error')) {
-    errorDiv.textContent = 'Authentication failed. Please try again.';
-  }
+  // Handle Form Submission (Placeholder for your actual Auth logic)
+  document.getElementById('loginForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    alert('Standard login triggered! Connect this to your /api/auth/login endpoint.');
+  });
 </script>
 
 </body>
